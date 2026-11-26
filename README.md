@@ -52,3 +52,8 @@ Videos and files that posts and the Library link to are in `static/content/media
 * After adding or changing posts, run `bash build.sh` again so the search index includes them. `hugo server` alone shows the pages and keeps the last index.
 * "Today" and "Yesterday" on the homepage follow the clock at the moment of the build, and the reader's own clock once the page is open.
 * `tools/tests/README.md` lists the checks. `tools/tests/shots.py` compares pictures of every kind of page before and after a change.
+
+## The public test copy
+
+The test copy is at https://austinkocher.github.io/immprof-test/ and is built by GitHub from the repository `austinkocher/immprof-test`. To update it, run `bash tools/publish_test.sh`, then commit from inside the test repository with EditorialPipeline's `tools/commit_script.py --run --no-changelog`. GitHub rebuilds it in about three minutes. `layouts/_partials/rooted.html` keeps links in post text working when the site sits inside a folder of an address.
+
