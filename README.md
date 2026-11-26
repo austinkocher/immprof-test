@@ -5,7 +5,7 @@ The redesigned ImmigrationProf Blog, made with Hugo. This folder is the one vers
 ## Running it
 
 ```bash
-cd ~/Documents/EditorialPipeline/projects/immprof-website-update/site && hugo server --port 4176
+cd ~/Documents/ClaudeImmProf/site && hugo server --port 4176
 ```
 
 Then open http://localhost:4176. `bash build.sh` makes the full build into `public/` with the search index; it needs Node as well as Hugo and takes about a second. The server writes its pages into `public/` as well, so run `bash build.sh` with the server stopped before publishing.

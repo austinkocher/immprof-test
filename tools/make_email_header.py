@@ -1,7 +1,7 @@
 """Draw the picture at the top of each email: the site's logo centered on the header cream, as it is on the site.
 1200 by 240 pixels, shown at 600 by 120. Written to static/brand/email-header.png, which is where the emails look for it
 (https://immprof.com/brand/email-header.png), and copied to ../email/assets/ for the samples.
-Run with a Python that has Pillow:  ../../../venv/bin/python3 tools/make_email_header.py
+Run with a Python that has Pillow:  ~/Documents/EditorialPipeline/venv/bin/python3 tools/make_email_header.py
 """
 import os, shutil
 from PIL import Image
