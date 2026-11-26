@@ -1,25 +1,39 @@
 # Builds the site and publishes it to GitHub Pages each time the main branch changes.
+# Drafts: the post form saves a draft as a pull request from a branch of this repository. Each open draft is built
+# as a full copy of the site with the draft in it, at /preview/pr-N/ on the published site, and the address is
+# reported back on the draft's latest change (a commit status named "preview") so the form can link to it.
+# Pull requests from other people's copies of this repository are never built.
 name: Publish the test site
 on:
   push:
     branches: [main]
+  pull_request_target:
+    types: [opened, synchronize, reopened, closed]
   workflow_dispatch:
 permissions:
   contents: read
   pages: write
   id-token: write
+  pull-requests: read
+  statuses: write
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 jobs:
   build:
+    if: github.event_name != 'pull_request_target' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     env:
       HUGO_VERSION: 0.170.1
-      HUGO_BASEURL: https://austinkocher.github.io/immprof-test/
+      SITE: https://austinkocher.github.io/immprof-test
       HUGO_PARAMS_TEST: "1"
+      GH_TOKEN: ${{ github.token }}
+    outputs:
+      drafts: ${{ steps.drafts.outputs.list }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -27,8 +41,28 @@ jobs:
         run: |
           curl -sSL -o /tmp/hugo.deb "https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_extended_${HUGO_VERSION}_linux-amd64.deb"
           sudo dpkg -i /tmp/hugo.deb
-      - name: Build
-        run: bash build.sh
+      - name: Keep resized pictures between builds
+        uses: actions/cache@v4
+        with:
+          path: resources
+          key: hugo-resources-${{ github.run_id }}
+          restore-keys: hugo-resources-
+      - name: Build the site
+        run: HUGO_BASEURL="$SITE/" bash build.sh
+      - name: Build a preview for each open draft
+        id: drafts
+        run: |
+          gh pr list --repo "$GITHUB_REPOSITORY" --state open --json number,headRefOid,isCrossRepository \
+            --jq '.[] | select(.isCrossRepository == false) | "\(.number) \(.headRefOid)"' > /tmp/drafts.txt
+          while read -r N SHA; do
+            [ -n "$N" ] || continue
+            git fetch --quiet --depth 1 origin "pull/$N/head"
+            git worktree add --quiet "../pr-$N" FETCH_HEAD
+            ln -s "$PWD/resources" "../pr-$N/resources"
+            (cd "../pr-$N" && HUGO_BASEURL="$SITE/preview/pr-$N/" hugo --quiet --destination "$GITHUB_WORKSPACE/public/preview/pr-$N")
+            echo "built the preview for draft $N"
+          done < /tmp/drafts.txt
+          echo "list=$(tr '\n' ',' < /tmp/drafts.txt)" >> "$GITHUB_OUTPUT"
       - uses: actions/upload-pages-artifact@v3
         with:
           path: public
@@ -38,6 +72,17 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+    env:
+      GH_TOKEN: ${{ github.token }}
+      SITE: https://austinkocher.github.io/immprof-test
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+      - name: Tell each draft where its preview is
+        run: |
+          echo "${{ needs.build.outputs.drafts }}" | tr ',' '\n' | while read -r N SHA; do
+            [ -n "$N" ] || continue
+            gh api -X POST "repos/$GITHUB_REPOSITORY/statuses/$SHA" -f state=success -f context=preview \
+              -f description="Preview of this draft" -f target_url="$SITE/preview/pr-$N" >/dev/null
+            echo "reported the preview for draft $N"
+          done

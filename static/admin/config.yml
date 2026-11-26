@@ -3,10 +3,20 @@
 #
 # On this computer: open http://localhost:4176/admin/ in Chrome and choose "Work with Local Repository",
 # then pick the site folder. Posts are saved as files in content/posts.
+#
+# On the public test copy (https://austinkocher.github.io/immprof-test/admin/) the form saves into the test repository.
+# Drafts (Austin, November 26, 2026: "we absolutely want an option to preview, that's really important before it goes
+# live"): saving a post keeps it as a draft on a branch of its own, GitHub builds a preview of the whole site with the
+# draft in it, the form links to that preview, and Publish puts the post on the site. Sveltia calls this the preview
+# workflow. The preview is built and reported by .github/workflows/pages.yml in the test repository.
 backend:
   name: github
-  repo: OWNER/immprof-site        # to be set when the site has a repository
+  repo: austinkocher/immprof-test
   branch: main
+  preview_context: preview        # the name of the report that says where a draft's preview is
+
+publish_mode: preview
+site_url: https://austinkocher.github.io/immprof-test
 
 media_folder: assets/media
 public_folder: /media
@@ -31,6 +41,7 @@ collections:
     # Fields run from what an editor fills in on every post down to what rarely changes (Austin, November 25, 2026).
     slug: "{{fields.slug | default('{{title}}')}}"
     summary: "{{title}} ({{date}})"
+    preview_path: "/{{slug}}/"
     sortable_fields: [date, title]
     fields:
       - { label: "Title", name: title, widget: string }

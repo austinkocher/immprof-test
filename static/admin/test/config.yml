@@ -4,6 +4,7 @@
 backend:
   name: test-repo
 
+
 media_folder: assets/media
 public_folder: /media
 
@@ -27,6 +28,7 @@ collections:
     # Fields run from what an editor fills in on every post down to what rarely changes (Austin, November 25, 2026).
     slug: "{{fields.slug | default('{{title}}')}}"
     summary: "{{title}} ({{date}})"
+    preview_path: "/{{slug}}/"
     sortable_fields: [date, title]
     fields:
       - { label: "Title", name: title, widget: string }
