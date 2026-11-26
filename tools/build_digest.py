@@ -1,7 +1,8 @@
 """Build the ImmigrationProf Blog digest emails from the site's posts.
 
 Daily:   python3 tools/build_digest.py daily  --date 2026-11-24 --out ../email
-         Every post published on that date (midnight to midnight, US Eastern), grouped by section in the site's section order.
+         Every post published on that date (midnight to midnight, US Eastern), grouped by section, the section with the
+         day's newest post first, as on the homepage.
          With no posts on that date it writes nothing and says so, so no empty email is sent.
 Weekly:  python3 tools/build_digest.py weekly --end 2026-11-22 --ranking most-read.txt --out ../email
          Ten posts from the seven days ending on that date, in the order given by the ranking file: one post address or slug
@@ -158,7 +159,7 @@ def page(kind, dateline, lead, blocks, preheader, a, footer="reader"):
 <tr><td align="center" style="padding:0;">
 <table role="presentation" class="w" width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px;">
 <tr><td bgcolor="{BAND}" style="padding:0;background:{BAND};"><a href="{a.site}/" style="text-decoration:none;"><img src="{a.assets}email-header.png" width="600" alt="ImmigrationProf Blog, since 2005" style="display:block;width:100%;height:auto;border:0;"></a></td></tr>
-<tr><td class="p" bgcolor="{BAND}" style="padding:0 32px 20px;background:{BAND};font:bold 14px {SANS};color:{INK};">{esc(kind)}{dl}</td></tr>
+<tr><td class="p" align="center" bgcolor="{BAND}" style="padding:0 32px 20px;background:{BAND};font:bold 14px {SANS};color:{INK};text-align:center;">{esc(kind)}{dl}</td></tr>
 {f'<tr><td class="p" style="padding:26px 32px 4px;font:16px/1.5 {SERIF};color:{META};">{esc(lead)}</td></tr>' if lead else ''}
 {blocks}
 <tr><td class="p" bgcolor="{TINT}" style="padding:24px 32px 8px;background:{TINT};font:13px/1.6 {SANS};color:{META};">
@@ -177,7 +178,7 @@ This project is powered by <a href="https://relevant-research.com" style="color:
 
 
 def item(p, a, meta, number=None):
-    tail = f'<span style="color:{ACCENT};font-weight:bold;">&hellip;</span> ' if p["cut"] else " "
+    tail = "&hellip; " if p["cut"] else " "   # in the text's own color, as on the site (Austin, November 26, 2026)
     url = a.site + p["path"]
     text = f"""<a class="t" href="{url}" style="font:bold 20px/1.25 {SERIF};color:{INK};text-decoration:none;">{esc(p['title'])}</a>
 <div style="font:15px/1.5 {SERIF};color:{META};margin-top:6px;">{esc(p['summary'])}{tail}<a href="{url}" style="color:{ACCENT};font-style:italic;">continue reading</a></div>
@@ -200,7 +201,12 @@ def daily(posts, order, day, a):
     if not todays:
         return None
     n = len(todays)
-    secs = [s for s in order if any(p["section"] == s for p in todays)]
+    # Sections run as on the homepage: the section with the day's newest post first. The site's own list of sections is
+    # alphabetical since November 26, 2026, which would put Books ahead of the day's news in every email.
+    latest = {}
+    for p in todays:
+        latest[p["section"]] = max(latest.get(p["section"], p["when"]), p["when"])
+    secs = sorted([s for s in order if s in latest], key=lambda s: latest[s], reverse=True)
     count = NUMBER_WORDS[n] if n < len(NUMBER_WORDS) else str(n)
     lead = "%s %s from %s." % (count, "post" if n == 1 else "posts", longdate(day).rsplit(",", 1)[0])
     blocks, text = [], ["ImmigrationProf Blog, daily digest", longdate(day), "", lead, ""]

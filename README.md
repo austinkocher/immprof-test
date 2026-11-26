@@ -57,3 +57,6 @@ Videos and files that posts and the Library link to are in `static/content/media
 
 The test copy is at https://austinkocher.github.io/immprof-test/ and is built by GitHub from the repository `austinkocher/immprof-test`. To update it, run `bash tools/publish_test.sh`, then commit from inside the test repository with EditorialPipeline's `tools/commit_script.py --run --no-changelog`. GitHub rebuilds it in about three minutes. `layouts/_partials/rooted.html` keeps links in post text working when the site sits inside a folder of an address.
 
+## Emails
+
+`tools/build_digest.py` builds the daily and weekly emails and the three signup notices from the posts. `tools/make_email_header.py` draws the picture at the top of each email from the site's logo into `static/brand/email-header.png`, the address the emails load it from. Decisions and open questions are in `../distribution-plan.md`.
