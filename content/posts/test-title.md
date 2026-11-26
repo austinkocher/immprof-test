@@ -6,7 +6,7 @@ tags:
   - Interviews
 authors:
   - Austin Kocher
-date: '2026-11-26T12:21:07-05:00'
+date: '2026-11-26T12:22:42-05:00'
 date_auto: true
 ---
 
@@ -17,5 +17,4 @@ Documented's Julia Malleck interviewed Marc Rosenblum, who ran the Office of Hom
 1. greetings.
 2. hello.
 
-
-<br>
+> This part is a quote.
