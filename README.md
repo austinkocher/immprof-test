@@ -55,8 +55,14 @@ Videos and files that posts and the Library link to are in `static/content/media
 
 ## The public test copy
 
+Drafts: the form at `/admin/` on the test copy saves a post as a draft and GitHub builds a preview of it at `/preview/pr-N/` before it is published. The settings are at the top of `static/admin/config.yml`, and the preview is built by `.github/workflows/pages.yml` in the test repository.
+
 The test copy is at https://austinkocher.github.io/immprof-test/ and is built by GitHub from the repository `austinkocher/immprof-test`. To update it, run `bash tools/publish_test.sh`, then commit from inside the test repository with EditorialPipeline's `tools/commit_script.py --run --no-changelog`. GitHub rebuilds it in about three minutes. `layouts/_partials/rooted.html` keeps links in post text working when the site sits inside a folder of an address.
 
 ## Emails
 
 `tools/build_digest.py` builds the daily and weekly emails and the three signup notices from the posts. `tools/make_email_header.py` draws the picture at the top of each email from the site's logo into `static/brand/email-header.png`, the address the emails load it from. Decisions and open questions are in `../distribution-plan.md`.
+
+## The writing page
+
+`/write/` is the editors' own post form (`layouts/write.html`, `static/write/write.js`, `static/write/write.css`, libraries in `static/write/vendor/`). It signs in with a GitHub access token, lists the open drafts, and saves a post as a draft in the repository named by `editorRepo`, `editorBranch` and `editorSite` in `hugo.toml`. Try it on this computer at `http://localhost:4176/write/?practice`, which keeps everything in the browser and saves nothing. The first form, `/admin/`, still works and reads the same drafts.

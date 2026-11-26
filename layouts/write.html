@@ -1,0 +1,19 @@
+{{ define "main" }}
+{{- /* The editors' writing page (Austin, November 26, 2026: the first form was "really cold", "the actual editor area is
+       really small", "the layout and design are really out of step with the website"). The form is laid out like the post
+       page itself: section, title, byline, text, tags. It saves each post as a draft in the site's repository, the same
+       drafts the first form (/admin/) makes, so the preview and the publish step are shared. Script: static/write/write.js. */ -}}
+{{- $sections := slice }}{{ range site.Taxonomies.sections.Alphabetical }}{{ $sections = $sections | append .Page.Title }}{{ end -}}
+{{- $tags := slice }}{{ range site.Taxonomies.tags.ByCount }}{{ $tags = $tags | append .Page.Title }}{{ end -}}
+{{- $authors := slice }}{{ range site.Taxonomies.authors.Alphabetical }}{{ $authors = $authors | append .Page.Title }}{{ end -}}
+{{- $guests := slice }}{{ range site.Taxonomies.contributors.Alphabetical }}{{ $guests = $guests | append .Page.Title }}{{ end -}}
+<meta name="robots" content="noindex, nofollow">
+<link rel="stylesheet" href="{{ "write/vendor/toastui-editor.min.css" | relURL }}">
+<link rel="stylesheet" href="{{ "write/write.css" | relURL }}">
+<div id="write" class="write"><p class="w-note">Loading the writing page.</p></div>
+<noscript><p>The writing page needs JavaScript.</p></noscript>
+<script type="application/json" id="write-data">{{ dict "repo" site.Params.editorRepo "branch" site.Params.editorBranch "site" site.Params.editorSite "sections" $sections "tags" $tags "authors" $authors "guests" $guests | jsonify | safeJS }}</script>
+<script src="{{ "write/vendor/js-yaml.min.js" | relURL }}"></script>
+<script src="{{ "write/vendor/toastui-editor-all.min.js" | relURL }}"></script>
+<script src="{{ "write/write.js" | relURL }}"></script>
+{{ end }}

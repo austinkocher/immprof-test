@@ -47,6 +47,10 @@ summaryLength = 40
   description = "The ImmigrationProf Blog is a source of timely updates on news, policy, law, and research."
   fillParas = "breaks"   # lead story text: paragraph breaks kept. "marks" runs paragraphs together with a red paragraph mark: kept in reserve
   showSources = false    # the Sources box under a post (off: Austin is leaning toward cutting it; the outlet name still shows on the homepage)
+  # The writing page (/write/): where it saves drafts and where a draft's preview is published.
+  editorRepo = "austinkocher/immprof-test"
+  editorBranch = "main"
+  editorSite = "https://austinkocher.github.io/immprof-test/"
 
 # Imported posts are kept as HTML so the editors' text is unchanged. New posts can be Markdown.
 [security]

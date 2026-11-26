@@ -3,6 +3,8 @@
 # as a full copy of the site with the draft in it, at /preview/pr-N/ on the published site, and the address is
 # reported back on the draft's latest change (a commit status named "preview") so the form can link to it.
 # A preview shows a post dated in the future, which the published site leaves out until its time has passed.
+# Each preview has a version.txt naming the draft's latest change, which the writing page (/write/) reads to tell
+# when the preview has caught up with a save.
 # Pull requests from other people's copies of this repository are never built.
 name: Publish the test site
 on:
@@ -61,6 +63,7 @@ jobs:
             git worktree add --quiet "../pr-$N" FETCH_HEAD
             ln -s "$PWD/resources" "../pr-$N/resources"
             (cd "../pr-$N" && HUGO_BASEURL="$SITE/preview/pr-$N/" hugo --quiet --buildFuture --buildDrafts --destination "$GITHUB_WORKSPACE/public/preview/pr-$N")
+            echo "$SHA" > "$GITHUB_WORKSPACE/public/preview/pr-$N/version.txt"
             echo "built the preview for draft $N"
           done < /tmp/drafts.txt
           echo "list=$(tr '\n' ',' < /tmp/drafts.txt)" >> "$GITHUB_OUTPUT"
