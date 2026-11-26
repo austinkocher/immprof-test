@@ -13,10 +13,13 @@
 <meta property="og:url" content="{{ .Permalink }}">
 {{- /* Pages that are not posts use the site's default card. */ -}}
 {{- $share := "brand/share.png" -}}
-{{- /* A post with no picture gets the card with its own title printed on it. */ -}}
-{{- if and .IsPage (eq .Type "posts") (not .Params.image) }}{{ $share = partial "sharecard.html" . }}{{ end -}}
-{{- /* Social platforms do not show SVG pictures, so a post whose image is an SVG uses the default card too. */ -}}
-{{- with .Params.image }}{{ if not (strings.HasSuffix (lower .) ".svg") }}{{ $share = (partial "img.html" (dict "src" . "w" 1200)).url }}{{ end }}{{ end }}
+{{- /* Every post is shared with the ImmigrationProf card, its own title printed on it (Austin, November 26, 2026).
+       An editor can switch one post to its own picture with "Share with this picture" (share_picture) in the post form.
+       Social platforms do not show SVG pictures, so an SVG never replaces the card. */ -}}
+{{- if and .IsPage (eq .Type "posts") }}
+  {{- $share = partial "sharecard.html" . -}}
+  {{- if .Params.share_picture }}{{ with .Params.image }}{{ if not (strings.HasSuffix (lower .) ".svg") }}{{ $share = (partial "img.html" (dict "src" . "w" 1200)).url }}{{ end }}{{ end }}{{ end -}}
+{{- end }}
 <meta property="og:image" content="{{ $share | absURL }}">
 <meta name="twitter:card" content="summary_large_image">
 {{ range .AlternativeOutputFormats -}}
