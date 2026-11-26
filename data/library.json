@@ -1,0 +1,243 @@
+{
+ "contact": {
+  "name": "Kit Johnson",
+  "email": ""
+ },
+ "categories": [
+  {
+   "slug": "immigration-syllabi",
+   "title": "Immigration Syllabi",
+   "text": "Syllabi for the survey course in immigration law, with the casebook each one uses.",
+   "entries": [
+    {
+     "title": "Sample syllabus from the casebook's authors",
+     "by": "",
+     "term": "",
+     "detail": "",
+     "casebook": "Immigration and Citizenship: Process and Policy, 10th ed.",
+     "casebook_url": "https://faculty.westacademic.com/book?id=357129",
+     "url": "/content/files/2026/08/MFSGC-Immigration-Citizenship-10th-ed-Sample-Syllabus.docx",
+     "type": "Word",
+     "size": "127 KB"
+    },
+    {
+     "title": "Immigration Law",
+     "by": "Ingrid Eagly",
+     "term": "Spring 2026",
+     "detail": "",
+     "casebook": "Immigration and Citizenship: Process and Policy, 10th ed.",
+     "casebook_url": "https://faculty.westacademic.com/book?id=357129",
+     "url": "/content/files/2026/08/Eagly--Immigration-Law-Syllabus-Spring-2026--final-.pdf",
+     "type": "PDF",
+     "size": "356 KB"
+    },
+    {
+     "title": "Immigration Law",
+     "by": "Lenni B. Benson",
+     "term": "Fall 2026",
+     "detail": "",
+     "casebook": "Immigration and Nationality Law: Problems and Strategies",
+     "casebook_url": "https://cap-press.com/books/isbn/9781531033675/Immigration-and-Nationality-Law-Third-Edition?srsltid=AfmBOoo6Xo-2rSwZOcNJdEJE6DKPm1C99uMG_HincQ7_FIsC69_nykpi",
+     "url": "/content/files/2026/08/Benson_Immigration-Law-Syllabus-Fall-2026-26-Aug.docx",
+     "type": "Word",
+     "size": "78 KB"
+    },
+    {
+     "title": "Immigration Law",
+     "by": "Bill Ong Hing",
+     "term": "Fall 2026",
+     "detail": "",
+     "casebook": "Immigration Law and Social Justice",
+     "casebook_url": "https://aspenpublishing.com/products/hing-immigration2?variant=46866200461592",
+     "url": "/content/files/2026/08/Hing_ImmigLawSyllabusFall2026.docx",
+     "type": "Word",
+     "size": "37 KB"
+    },
+    {
+     "title": "Immigration",
+     "by": "Kit Johnson",
+     "term": "2025",
+     "detail": "3 credits, podium",
+     "casebook": "Immigration Law: An Open Casebook",
+     "casebook_url": "https://kitjohnson.net/casebook/ILAOC.html",
+     "url": "/content/files/2026/08/2025_Immigration_Kit_Johnson.pdf",
+     "type": "PDF",
+     "size": "204 KB"
+    },
+    {
+     "title": "Syllabus supplements",
+     "by": "Just Security",
+     "term": "",
+     "detail": "",
+     "casebook": "",
+     "casebook_url": "",
+     "url": "https://www.justsecurity.org/153576/syllabus-supplements/",
+     "type": "Link",
+     "size": ""
+    }
+   ]
+  },
+  {
+   "slug": "crimmigration-syllabi",
+   "title": "Crimmigration Syllabi",
+   "text": "Syllabi for courses on criminal law and immigration law, with the casebook each one uses.",
+   "entries": [
+    {
+     "title": "Crimmigration, Crisis, and Conflict",
+     "by": "Juliet P. Stumpf",
+     "term": "Spring 2026",
+     "detail": "",
+     "casebook": "Crimmigration Law, 2d ed.",
+     "casebook_url": "https://www.americanbar.org/products/inv/book/414296154/",
+     "url": "/content/files/2026/08/Stumpf_CCC-Spring-2026-Syllabus-Immprof.docx",
+     "type": "Word",
+     "size": "4 MB"
+    },
+    {
+     "title": "Crimmigration",
+     "by": "Kit Johnson",
+     "term": "2024",
+     "detail": "3 credits, podium",
+     "casebook": "Crimmigration Law: An Open Casebook",
+     "casebook_url": "https://kitjohnson.net/casebook/CLAOC.html",
+     "url": "/content/files/2026/08/2024_Crimmigration_Kit_Johnson.pdf",
+     "type": "PDF",
+     "size": "133 KB"
+    },
+    {
+     "title": "Crimmigration",
+     "by": "Kit Johnson",
+     "term": "2026",
+     "detail": "2 credits, podium",
+     "casebook": "Crimmigration Law: An Open Casebook",
+     "casebook_url": "https://kitjohnson.net/casebook/CLAOC.html",
+     "url": "/content/files/2026/08/2026_Crimmigration_Syllabus.pdf",
+     "type": "PDF",
+     "size": "354 KB"
+    },
+    {
+     "title": "Crimmigration",
+     "by": "Emily Claire Torstveit Ngara",
+     "term": "Spring 2026",
+     "detail": "",
+     "casebook": "Crimmigration in a Nutshell",
+     "casebook_url": "https://subscription.westacademic.com/Book/Detail?id=28920",
+     "url": "/content/files/2026/08/Torstveit-Ngara-Crimmigration-Spring-2026-v-03.19.2026.docx",
+     "type": "Word",
+     "size": "31 KB"
+    },
+    {
+     "title": "The Intersection of Criminal Law and Immigration Law",
+     "by": "Torrey",
+     "term": "Fall 2026",
+     "detail": "2 credits",
+     "casebook": "A variety of readings",
+     "casebook_url": "",
+     "url": "/content/files/2026/09/Torrey_Crimmigration-Syllabus-Fall-2026_vFinal_Syllabus-Bank.docx",
+     "type": "Word",
+     "size": "92 KB"
+    }
+   ]
+  },
+  {
+   "slug": "clinic-syllabi",
+   "title": "Clinic Syllabi",
+   "text": "Syllabi and seminar plans for immigration clinics.",
+   "entries": []
+  },
+  {
+   "slug": "other-syllabi",
+   "title": "Other Syllabi",
+   "text": "Seminars and specialized courses, such as business immigration.",
+   "entries": [
+    {
+     "title": "The Global Employee: Advanced Business Immigration Seminar",
+     "by": "Lenni B. Benson",
+     "term": "Fall 2026",
+     "detail": "",
+     "casebook": "",
+     "casebook_url": "",
+     "url": "/content/files/2026/08/Benson_Global-Employee-Seminar-Syllabus-Fall-2026Bensonrevision.docx",
+     "type": "Word",
+     "size": "40 KB"
+    }
+   ]
+  },
+  {
+   "slug": "exercises",
+   "title": "Exercises",
+   "text": "Classroom exercises and tools.",
+   "entries": [
+    {
+     "title": "The Famous Thronson Immigrant Ranking Exercise",
+     "by": "",
+     "term": "",
+     "detail": "",
+     "casebook": "",
+     "casebook_url": "",
+     "url": "/content/files/2026/08/The-Famous-Thronson-Immigrant-Ranking-Exercise.docx",
+     "type": "Word",
+     "size": "15 KB"
+    },
+    {
+     "title": "First Day Exercise, Immigration and Nationality Law",
+     "by": "Lenni B. Benson",
+     "term": "",
+     "detail": "",
+     "casebook": "",
+     "casebook_url": "",
+     "url": "/content/files/2026/08/First-Day-Exercise---Immigration-and-Nationality-Law.docx",
+     "type": "Word",
+     "size": "3 MB"
+    },
+    {
+     "title": "Migrant Compass Tools",
+     "by": "Lenni B. Benson",
+     "term": "",
+     "detail": "Compares green card pathways",
+     "casebook": "",
+     "casebook_url": "",
+     "url": "https://migrantcompass.com/",
+     "type": "Link",
+     "size": ""
+    }
+   ]
+  },
+  {
+   "slug": "exams",
+   "title": "Exams",
+   "text": "Past exams and exam archives.",
+   "entries": [
+    {
+     "title": "Immigration and Crimmigration Essay Exams",
+     "by": "Kit Johnson",
+     "term": "",
+     "detail": "Exam archive",
+     "casebook": "",
+     "casebook_url": "",
+     "url": "https://kitjohnson.net/exam_archive/",
+     "type": "Link",
+     "size": ""
+    }
+   ]
+  },
+  {
+   "slug": "multimedia-teaching-materials",
+   "title": "Multimedia Teaching Materials",
+   "text": "Video and audio for use in class.",
+   "entries": [
+    {
+     "title": "The Least of These",
+     "by": "",
+     "term": "",
+     "detail": "Documentary about family detention at the T. Don Hutto Residential Center, 2007 to 2008",
+     "casebook": "",
+     "casebook_url": "",
+     "url": "https://vimeo.com/179342261",
+     "type": "Video",
+     "size": ""
+    }
+   ]
+  }
+ ]
+}

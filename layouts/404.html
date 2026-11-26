@@ -1,0 +1,13 @@
+{{ define "main" }}
+{{- /* Shown for any address that is not a page on the site. The host must be told to serve /404.html for those. */ -}}
+<article class="post plain">
+  <header class="post-h"><h1>Page not found</h1></header>
+  <div class="post-body">
+    <p>There is no page at this address. It may have moved, or the address may have a typing mistake in it.</p>
+    <form class="arc-f" action="{{ "archive/" | relURL }}" method="get" role="search">
+      <label class="arc-q"><span>Search the blog</span><input type="search" name="q" placeholder="Search titles, text, authors and tags" autocomplete="off"></label>
+    </form>
+    <p>Posts from 2005 to September 2025 are in <a href="{{ "archive/" | relURL }}#archive">the full archive</a>. The newest posts are on the <a href="{{ site.Home.RelPermalink }}">front page</a>.</p>
+  </div>
+</article>
+{{ end }}

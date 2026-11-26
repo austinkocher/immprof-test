@@ -1,0 +1,32 @@
+{{- /* Automatic resizing. Call: partial "img.html" (dict "src" "media/photo.jpg" "w" 1400).
+       Returns a dict with url, width and height. A picture wider than "w" pixels is made smaller when the site is built,
+       and a large PNG or JPEG is saved as WebP, so a camera file reaches readers small. The picture keeps its shape and
+       is never cropped. SVG, GIF and animated WebP files are published as they are. An address that is not a file in assets/media passes through unchanged. */ -}}
+{{- $src := .src -}}
+{{- $w := .w | default 1400 -}}
+{{- $out := dict "url" ($src | relURL) "width" 0 "height" 0 -}}
+{{- $key := strings.TrimPrefix "/" $src -}}
+{{- if strings.HasPrefix $key "media/" -}}
+  {{- with resources.Get $key -}}
+    {{- $r := . -}}
+    {{- $done := false -}}
+    {{- /* A file Hugo cannot read as a picture (an icon, an SVG, a GIF, a file with the wrong ending) is published as it is. */ -}}
+    {{- /* An animated WebP is left alone too: resizing keeps only its first frame, which is often blank (found November 26, 2026:
+           one animated signature is the picture on 17 of the 200 sample posts). */ -}}
+    {{- $moving := and (findRE `(?i)\.webp$` $key) (strings.Contains $r.Content "ANIM") -}}
+    {{- if and (reflect.IsImageResourceProcessable $r) (not (findRE `(?i)\.gif$` $key)) (not $moving) -}}
+      {{- $spec := "" -}}
+      {{- with try $r.Width -}}{{- if not .Err -}}
+        {{- if gt .Value $w -}}{{- $spec = printf "%dx webp" $w -}}
+        {{- else if gt (len $r.Content) 200000 -}}{{- $spec = printf "%dx webp" .Value -}}{{- end -}}
+      {{- end -}}{{- end -}}
+      {{- if $spec -}}
+        {{- with try ($r.Resize $spec) -}}{{- if not .Err -}}{{- $r = .Value -}}{{- end -}}{{- end -}}
+      {{- end -}}
+      {{- with try $r.Width -}}{{- if not .Err -}}{{- $out = dict "url" $r.RelPermalink "width" .Value "height" $r.Height -}}{{- $done = true -}}{{- end -}}{{- end -}}
+    {{- end -}}
+    {{- /* Asking for an address is what publishes a file, so the original is asked for only when it is the one used. */ -}}
+    {{- if not $done -}}{{- $out = dict "url" $r.RelPermalink "width" 0 "height" 0 -}}{{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- return $out -}}

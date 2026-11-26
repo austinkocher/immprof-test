@@ -1,0 +1,23 @@
+{{- /* The picture for a post in the homepage's section columns. A post with a picture of its own shows it; a post without
+       one shows none, and its column starts with the headline (Austin, November 26, 2026: "Leave it as it is. Pictures where
+       posts have them, text where they do not."). A picture counts only when it can fill the frame: at least 400 pixels
+       wide and between 1 and 2.4 times as wide as tall. It must not be animated or nearly blank (the same measure the lead story uses), since an editor's animated
+       signature shows as an empty white box. That leaves out the signature strips and small logos that some posts
+       have as their only picture, which showed as a white box with a sliver of a logo. A file that cannot be read, or that reports no height
+       (one such file stopped the build of the full site), counts as no picture. Called with dict "p" post "w" width. Returns the HTML, or nothing. */ -}}
+{{- $img := .p.Params.image -}}
+{{- $w := .w -}}
+{{- if and $img (not (strings.HasSuffix (lower $img) ".svg")) -}}
+  {{- with resources.Get $img -}}
+    {{- $r := . -}}
+    {{- if and (reflect.IsImageResourceProcessable $r) (not (strings.Contains $r.Content "ANIM")) -}}
+      {{- with try $r.Width -}}{{- if and (not .Err) (gt $r.Height 0) -}}
+        {{- $ratio := div (float .Value) $r.Height -}}
+        {{- $dense := div (float (len $r.Content)) (mul .Value $r.Height) -}}
+        {{- if and (ge .Value 400) (ge $ratio 1.0) (le $ratio 2.4) (ge $dense 0.025) -}}
+<img src="{{ (partial "img.html" (dict "src" $img "w" $w)).url }}" alt="" loading="lazy">
+        {{- end -}}
+      {{- end -}}{{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}

@@ -1,0 +1,67 @@
+# ImmigrationProf Blog: working site, built with Hugo.
+#   Serve it:  hugo server --port 4174        Build it:  hugo --cleanDestinationDir
+baseURL = "http://localhost:4176/"
+title = "ImmigrationProf Blog"
+locale = "en-US"
+timeZone = "America/New_York"
+enableRobotsTXT = true
+disableKinds = ["section"]
+summaryLength = 40
+
+[taxonomies]
+  section = "sections"
+  tag = "tags"
+  author = "authors"
+  contributor = "contributors"   # guest authors: the "Guest author" field. Editors are "authors".
+
+# Every existing address stays as it is on the live site: /post-slug/, /author/x/. Sections sit at /name/, tags at /tag/name/.
+[permalinks.page]
+  posts = "/:slugorcontentbasename/"   # the Web address field when filled in, otherwise the file name set when the post was first saved
+[permalinks.term]
+  sections = "/:slug/"
+  tags = "/tag/:slug/"
+  authors = "/author/:slug/"
+  contributors = "/author/:slug/"   # a guest's page sits beside the editors' pages
+[permalinks.taxonomy]
+  sections = "/sections/"
+  tags = "/tag/"
+  authors = "/author/"
+  contributors = "/contributors/"
+
+[pagination]
+  pagerSize = 30
+
+[outputs]
+  home = ["html", "rss"]
+  term = ["html", "rss"]
+  taxonomy = ["html"]
+  page = ["html"]
+
+[services.rss]
+  limit = 50
+
+[markup.goldmark.renderer]
+  unsafe = true
+
+[params]
+  description = "The ImmigrationProf Blog is a source of timely updates on news, policy, law, and research."
+  fillParas = "breaks"   # lead story text: paragraph breaks kept. "marks" runs paragraphs together with a red paragraph mark: kept in reserve
+  showSources = false    # the Sources box under a post (off: Austin is leaning toward cutting it; the outlet name still shows on the homepage)
+
+# Imported posts are kept as HTML so the editors' text is unchanged. New posts can be Markdown.
+[security]
+  allowContent = ['! ^text/org$']
+
+# Images. Uploads land in assets/media, where Hugo's image tools can reach them, so every picture is resized when the
+# site is built (layouts/_partials/img.html). Only the pictures a page uses are published, at /media/.
+[imaging]
+  resampleFilter = "Lanczos"
+[imaging.webp]
+  quality = 82
+[imaging.jpeg]
+  quality = 82
+
+# For testing: "hugo --renderSegments home" builds the homepage alone.
+[segments.home]
+  [[segments.home.includes]]
+    kind = "home"

@@ -1,0 +1,30 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ if .IsHome }}{{ site.Title }}{{ else }}{{ .Title }}, {{ site.Title }}{{ end }}</title>
+{{- $desc := site.Params.description -}}
+{{- if and .IsPage (eq .Type "posts") }}{{ $desc = .Summary | plainify | htmlUnescape | truncate 180 }}{{ else if .Description }}{{ $desc = .Description }}{{ end }}
+<meta name="description" content="{{ $desc }}">
+<link rel="canonical" href="{{ .Permalink }}">{{ if site.Params.test }}
+<meta name="robots" content="noindex, nofollow">{{ end }}
+<meta property="og:site_name" content="{{ site.Title }}">
+<meta property="og:title" content="{{ .Title }}">
+<meta property="og:description" content="{{ $desc }}">
+<meta property="og:type" content="{{ if .IsPage }}article{{ else }}website{{ end }}">
+<meta property="og:url" content="{{ .Permalink }}">
+{{- /* Pages that are not posts use the site's default card. */ -}}
+{{- $share := "brand/share.png" -}}
+{{- /* A post with no picture gets the card with its own title printed on it. */ -}}
+{{- if and .IsPage (eq .Type "posts") (not .Params.image) }}{{ $share = partial "sharecard.html" . }}{{ end -}}
+{{- /* Social platforms do not show SVG pictures, so a post whose image is an SVG uses the default card too. */ -}}
+{{- with .Params.image }}{{ if not (strings.HasSuffix (lower .) ".svg") }}{{ $share = (partial "img.html" (dict "src" . "w" 1200)).url }}{{ end }}{{ end }}
+<meta property="og:image" content="{{ $share | absURL }}">
+<meta name="twitter:card" content="summary_large_image">
+{{ range .AlternativeOutputFormats -}}
+<link rel="{{ .Rel }}" type="{{ .MediaType.Type }}" href="{{ .Permalink }}" title="{{ $.Title }}">
+{{ end -}}
+{{ if not .IsHome }}<link rel="alternate" type="application/rss+xml" href="{{ "index.xml" | absURL }}" title="{{ site.Title }}">{{ end }}
+{{- /* Browser icon: the round IP mark (K1), drawn by email/_source/mark.html. */ -}}
+<link rel="icon" type="image/png" sizes="32x32" href="{{ "brand/mark-32.png" | relURL }}">
+<link rel="icon" type="image/png" sizes="192x192" href="{{ "brand/mark-192.png" | relURL }}">
+<link rel="apple-touch-icon" href="{{ "brand/mark-180.png" | relURL }}">
+<link rel="stylesheet" href="{{ "css/site.css" | relURL }}">

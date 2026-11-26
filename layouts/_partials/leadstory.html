@@ -1,0 +1,7 @@
+{{- /* One story in the homepage's lead block: section label, headline, opening text and date line.
+       Called with dict "p" post "now" time "h" heading level ("h2" for the lead, "h3" for the second story) "pic" bool. */ -}}
+{{- $p := .p -}}
+<p class="g-lab">{{ with index ($p.GetTerms "sections") 0 }}<a href="{{ .RelPermalink }}">{{ .Title }}</a>{{ end }}</p>
+{{ printf "<%s>" .h | safeHTML }}<a href="{{ $p.RelPermalink }}">{{ $p.Title }}</a>{{ printf "</%s>" .h | safeHTML }}
+<div class="g-long" data-url="{{ $p.RelPermalink }}" data-paras="{{ site.Params.fillParas | default "breaks" }}">{{ if .pic }}{{ with partial "leadpic.html" $p }}<a class="g-fig" href="{{ $p.RelPermalink }}" tabindex="-1" aria-hidden="true"><img src="{{ . }}" alt=""></a>{{ end }}{{ end }}<div class="g-long-in">{{ range partial "leadparas.html" $p }}<p>{{ . }}</p>{{ end }}</div></div>
+<p class="g-by">{{ partial "when.html" (dict "p" $p "now" .now "long" true) }}<span class="g-sep">{{ range partial "byline.html" $p }}<a href="{{ .RelPermalink }}">{{ .Title }}</a>{{ end }}</span>{{ if $p.GetTerms "contributors" }}<span class="g-sep">Guest contributor</span>{{ end }}</p>

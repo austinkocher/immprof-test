@@ -1,0 +1,9 @@
+{{- /* A picture in a Markdown post: ![description](file). File and description only, the standard Markdown way
+       (Austin, November 25, 2026). The picture is resized at build time and loads only when the reader reaches it. */ -}}
+{{- $wide := false -}}
+{{- /* The post's "Wide pictures" switch (wide: true) lets a landscape picture run the full width of the page.
+       An upright or square picture stays in the text column whatever the switch says. */ -}}
+{{- $i := partial "img.html" (dict "src" .Destination "w" 1800) -}}
+{{- if and .Page.Params.wide $i.width (gt (float $i.width) (mul 1.25 $i.height)) -}}{{- $wide = true -}}
+{{- else -}}{{- $i = partial "img.html" (dict "src" .Destination "w" 1400) -}}{{- end -}}
+<img{{ if $wide }} class="wide"{{ end }} src="{{ $i.url }}" alt="{{ .PlainText }}"{{ with $i.width }} width="{{ . }}" height="{{ $i.height }}"{{ end }} loading="lazy">

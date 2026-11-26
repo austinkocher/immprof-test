@@ -1,0 +1,19 @@
+{{ define "main" }}
+<article class="post plain">
+  <header class="post-h"><h1>Get ImmProf in your inbox</h1></header>
+  <div class="post-body">
+    <form class="signup" onsubmit="return false">
+      <fieldset>
+        <legend>Choose one or both</legend>
+        <label><input type="checkbox" checked> <span><strong>Daily.</strong> Every post from the day before, grouped by section, each morning.</span></label>
+        <label><input type="checkbox"> <span><strong>Weekly.</strong> The ten most-read posts of the week, once a week.</span></label>
+      </fieldset>
+      <label class="signup-email"><span>Email address</span><input type="email" placeholder="name@example.edu"></label>
+      <button type="submit">Sign up</button>
+      <p class="signup-note">Free. Cancel anytime with the link at the bottom of every email.</p>
+      <p class="signup-note">Signup is not connected yet on this local build.</p>
+    </form>
+    <p>Feed readers can use <a href="{{ "index.xml" | relURL }}">RSS for the whole site</a> and <a href="{{ "sections/" | relURL }}">RSS for each section</a>.</p>
+  </div>
+</article>
+{{ end }}

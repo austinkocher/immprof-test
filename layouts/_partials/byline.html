@@ -1,0 +1,6 @@
+{{- /* Who wrote a post. A guest post names its guest in "contributors" (the Guest author field) and the editor who
+       published it in "authors" (the Byline field); the guest is the byline. Every other post's byline is its editor.
+       Returns the list of people to show. */ -}}
+{{- $who := .GetTerms "contributors" -}}
+{{- if not $who -}}{{- $who = .GetTerms "authors" -}}{{- end -}}
+{{- return $who -}}

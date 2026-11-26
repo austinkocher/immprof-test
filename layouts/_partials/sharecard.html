@@ -1,0 +1,53 @@
+{{- /* The share card for a post with no picture of its own (design C, chosen by Austin on November 25, 2026): the section
+       label in small red capitals, the post's title in serif, and along the foot the ImmigrationProf Blog name with
+       Since 2005 and the address. Made when the site is built, 1200 x 630, and kept in resources/ so each card is drawn once.
+       The fixed pieces come from tools/make_share_assets.sh. The title is broken into even lines here so the label and title
+       can be centered top to bottom as one block; long titles get smaller type, and a title too long for five lines is cut
+       at a word with an ellipsis. Returns the card's address. */ -}}
+{{- $card := resources.Get "brand/share-base.png" -}}
+{{- $font := resources.Get "fonts/SourceSerif4-Semibold.ttf" -}}
+{{- $title := .Title -}}
+{{- $n := strings.RuneCount $title -}}
+{{- $size := 66 -}}{{- $per := 30 -}}
+{{- if gt $n 60 -}}{{- $size = 56 -}}{{- $per = 36 -}}{{- end -}}
+{{- if gt $n 105 -}}{{- $size = 46 -}}{{- $per = 44 -}}{{- end -}}
+{{- /* Even lines: work out how many lines the title needs, aim each line at an equal share of it, and widen the
+       lines a little at a time until the title fits in that many lines. */ -}}
+{{- $need := int (math.Ceil (div (float $n) $per)) -}}
+{{- $lines := slice -}}
+{{- $done := false -}}
+{{- range $want := slice $need (add $need 1) -}}
+  {{- range seq (int (math.Ceil (div (float $n) $want))) $per -}}
+    {{- if not $done -}}
+      {{- $lines = partial "inline/wrap.html" (dict "t" $title "per" .) -}}
+      {{- if le (len $lines) $want -}}{{- $done = true -}}{{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- if not $done -}}{{- $lines = partial "inline/wrap.html" (dict "t" $title "per" $per) -}}{{- end -}}
+{{- if gt (len $lines) 5 -}}
+  {{- $lines = first 5 $lines -}}
+  {{- $lines = (first 4 $lines) | append (printf "%s…" (index $lines 4)) -}}
+{{- end -}}
+{{- $gap := math.Round (mul $size 0.12) -}}
+{{- $block := sub (mul (len $lines) (add $size $gap)) $gap -}}
+{{- /* The section label, when the post has a section with a drawn label, sits 48 pixels above the title. */ -}}
+{{- $kick := false -}}
+{{- range first 1 (.GetTerms "sections") -}}{{- with resources.Get (printf "brand/kicker/%s.png" (urlize .Title)) -}}{{- $kick = . -}}{{- end -}}{{- end -}}
+{{- $lead := cond (not $kick) 0 48 -}}
+{{- /* The block is centered in the space above the name at the foot (which starts near y 520). */ -}}
+{{- $y := math.Round (sub 270 (div (add $block $lead) 2.0)) -}}
+{{- if $kick -}}{{- $card = $card.Filter (images.Overlay $kick 80 (int $y)) -}}{{- end -}}
+{{- $card = $card.Filter (images.Text (delimit $lines "\n") (dict "color" "#241f1a" "size" $size "linespacing" $gap "x" 80 "y" (add $y $lead) "font" $font)) -}}
+{{- return $card.RelPermalink -}}
+{{- define "_partials/inline/wrap.html" -}}
+  {{- $per := .per -}}{{- $lines := slice -}}{{- $cur := "" -}}
+  {{- range split .t " " -}}
+    {{- if and $cur (gt (add (strings.RuneCount $cur) (strings.RuneCount .) 1) $per) -}}
+      {{- $lines = $lines | append $cur -}}{{- $cur = . -}}
+    {{- else -}}
+      {{- $cur = cond (eq $cur "") . (printf "%s %s" $cur .) -}}
+    {{- end -}}
+  {{- end -}}
+  {{- return ($lines | append $cur) -}}
+{{- end -}}

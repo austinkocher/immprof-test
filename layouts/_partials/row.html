@@ -1,0 +1,12 @@
+{{- $p := .p -}}
+{{- /* A picture shows only when it can fill the frame (see pic.html), so a signature strip or small logo is left out. */ -}}
+{{- $pic := partial "pic.html" (dict "p" $p "w" 400) -}}
+<li class="row{{ if $pic }} has-img{{ end }}">
+  <div class="row-text">
+    <p class="row-meta"><time datetime="{{ $p.Date.Format "2006-01-02" }}">{{ $p.Date.Format "January 2, 2006" }}</time>{{ if and (ne .kind "author") (ne .kind "contributor") }}{{ range partial "byline.html" $p }} <a class="row-by" href="{{ .RelPermalink }}">{{ .Title }}</a>{{ end }}{{ end }}{{ if ne .kind "section" }}{{ with index ($p.GetTerms "sections") 0 }} <a class="row-sec" href="{{ .RelPermalink }}">{{ .Title }}</a>{{ end }}{{ end }}</p>
+    <h2><a href="{{ $p.RelPermalink }}">{{ $p.Title }}</a></h2>
+    <p class="row-sum">{{ $p.Summary | plainify | htmlUnescape | truncate 220 }}</p>
+    <p class="row-src">{{ with $p.Params.sources }}{{ range $i, $s := . }}{{ if $i }}, {{ end }}<a href="{{ $s.url }}" rel="noopener">{{ $s.name }}</a>{{ end }}{{ end }}</p>
+  </div>
+  {{ with $pic }}<a class="row-img" href="{{ $p.RelPermalink }}" tabindex="-1" aria-hidden="true">{{ . }}</a>{{ end }}
+</li>

@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>{{ .Permalink }}</title>
+<link rel="canonical" href="{{ .Permalink }}">
+<meta name="robots" content="noindex">
+{{- /* An old address that now leads somewhere else. The script keeps anything after the question mark, so a saved
+       search such as /search/?q=asylum opens the Archive with the same words. Without scripts the plain redirect below runs. */}}
+<script>location.replace({{ .Permalink }} + location.search + location.hash);</script>
+<meta http-equiv="refresh" content="0; url={{ .Permalink }}">
+</head>
+<body><p><a href="{{ .Permalink }}">{{ .Permalink }}</a></p></body>
+</html>

@@ -1,0 +1,9 @@
+{{- /* At the foot of the Library page and of each page within it (Austin, November 26, 2026: "add the share your materials
+       block at the bottom of all pages within the library too and say contact Kit with an embedded link to her email").
+       The contact is in data/library.json. */ -}}
+{{- with hugo.Data.library.contact -}}
+<section class="lib-add">
+  <h2>Share your materials</h2>
+  <p>The Library is built from what immigration law professors send in. To add a syllabus, an exercise or an exam, {{ if .email }}<a href="mailto:{{ .email }}">contact {{ .name }}</a>{{ else }}contact {{ .name }}{{ end }}.</p>
+</section>
+{{- end -}}

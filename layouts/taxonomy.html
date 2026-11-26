@@ -1,0 +1,28 @@
+{{ define "main" }}
+{{- $kind := .Data.Singular -}}
+<header class="list-h">
+  <h1>{{ if eq $kind "author" }}Editors{{ else if eq $kind "tag" }}Tags{{ else }}Sections{{ end }}</h1>
+  {{ if eq $kind "tag" }}<p class="list-d">Tags describe topics across all sections.</p>{{ end }}
+  {{ if eq $kind "section" }}<p class="list-d">Every post belongs to one section. Each section has its own page and its own RSS feed.</p>{{ end }}
+</header>
+{{ if eq $kind "author" }}
+  {{- /* Editors only, laid out as on the live site's Editors page: photo at the right, name, bio with its links, in the
+         live page's order (Austin, November 26, 2026: "only the editors exactly how the current editors page does").
+         Name, bio, photo and order are in each editor's file under content/authors. The name leads to the editor's posts.
+         Guest contributors keep their own pages, reached from a byline or the Archive search. */ -}}
+  {{ range sort .Pages "Params.order" }}
+  <section class="ed">
+    {{ with .Params.photo }}<figure class="ed-ph"><img src="{{ (partial "img.html" (dict "src" . "w" 800)).url }}" alt="" loading="lazy"></figure>{{ end }}
+    <h2 class="ed-n"><a href="{{ .RelPermalink }}">{{ .Params.fullname | default .Title }}</a></h2>
+    {{ with .Params.bio }}<p class="ed-b">{{ . | safeHTML }}</p>{{ end }}
+  </section>
+  {{ end }}
+{{ else }}
+<ul class="terms terms-{{ $kind }}">
+  {{ $terms := .Pages.ByTitle }}{{ if eq $kind "section" }}{{ $terms = .Pages.ByWeight }}{{ end }}
+  {{ range $terms }}
+  <li><a href="{{ .RelPermalink }}">{{ .Title }}</a> <span class="terms-n">{{ len .Pages }}</span>{{ if ne $kind "tag" }}{{ with .OutputFormats.Get "rss" }} <a class="rss" href="{{ .RelPermalink }}">RSS</a>{{ end }}{{ end }}</li>
+  {{ end }}
+</ul>
+{{ end }}
+{{ end }}

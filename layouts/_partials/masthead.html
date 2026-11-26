@@ -1,0 +1,35 @@
+{{- /* Order runs from general to specific (Austin, November 25, 2026): the links about the site, the name, the sections, then the page. */ -}}
+<header class="masthead">
+  <nav class="nav-util" aria-label="Site">
+    <ul>
+      <li><a href="{{ "about/" | relURL }}">About</a></li>
+      <li><a href="{{ "author/" | relURL }}">Editors</a></li>
+      <li><a href="{{ "library/" | relURL }}">Library</a></li>
+      <li><a href="{{ "archive/" | relURL }}">Archive</a></li>
+      {{- /* Search box on every page (Austin, November 26, 2026). Enter sends the words to the Archive, which shows the results
+             and has the filters. There is no separate Search page. */}}
+      <li class="nav-q"><form action="{{ "archive/" | relURL }}" method="get" role="search"><label class="inbox-l" for="nav-q">Search the site</label><input type="search" id="nav-q" name="q" placeholder="Search" autocomplete="off"></form></li>
+    </ul>
+  </nav>
+  <div class="brand">
+    {{- /* The chosen logo (F1 on mockups/logos/logo-typefaces.png) as one picture, brand/logo.png, drawn at four times its
+           size on the page. tools/make_logo.md says how it was made. */ -}}
+    <a class="brand-name" href="{{ site.Home.RelPermalink }}"><img src="{{ "brand/logo.png" | relURL }}" alt="ImmigrationProf Blog, since 2005" width="1990" height="211"></a>
+  </div>
+  <nav class="nav-sections" aria-label="Sections">
+    {{- /* The same sections twice: a bar for wide screens, in the order of data/sections.yaml (alphabetical), and for
+           narrow screens one "Sections" control that opens in the three groups named in that file. The stylesheet shows
+           one or the other. */ -}}
+    {{- define "seclink" }}{{ with site.GetPage (printf "/sections/%s" (urlize .name)) }}<li><a href="{{ .RelPermalink }}"{{ if not .Pages }} class="is-empty"{{ end }}>{{ .Title }}</a></li>{{ end }}{{ end }}
+    <ul class="nav-bar">
+      {{- range hugo.Data.sections }}{{ template "seclink" . }}{{ end }}
+    </ul>
+    <details class="nav-fold">
+      <summary>Sections</summary>
+      {{- range $g := slice "Law and policy" "Research and writing" "The field" }}
+      <h3>{{ $g }}</h3>
+      <ul>{{ range where hugo.Data.sections "group" $g }}{{ template "seclink" . }}{{ end }}</ul>
+      {{- end }}
+    </details>
+  </nav>
+</header>

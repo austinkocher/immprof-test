@@ -1,0 +1,6 @@
+public/
+resources/
+static/pagefind/
+.hugo_build.lock
+__pycache__/
+.DS_Store

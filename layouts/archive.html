@@ -1,0 +1,142 @@
+{{ define "main" }}
+{{- /* One Archive page with two sections (Austin, November 26, 2026).
+       Browse posts (first called "Recent archive"; Austin, November 26, 2026: that name made current posts sound old): the posts on this site, September 2025 to today. Austin: it "can't just be expanding months like
+       that, it will get crazy", so it is a search box with filters for section, author and date. It uses the same
+       Pagefind index as the Search page (built by build.sh), limited to posts by the year filter every post has. The
+       newest ten posts show until the reader searches or filters. A search can be linked:
+       /archive/?q=asylum&section=News&editor=...&date=2026-11
+       The full archive: the posts from 2005 to September 2025, on a separate site, archive.immprof.com, which has its own
+       search and filters. Total and dates are in data/oldarchive.json. */ -}}
+{{- $old := hugo.Data.oldarchive -}}
+{{- $posts := where site.RegularPages "Type" "posts" -}}
+{{- $guests := slice -}}{{- range site.Taxonomies.contributors.Alphabetical -}}{{- $guests = $guests | append .Page.Title -}}{{- end -}}
+<header class="list-h">
+  <h1>Archive</h1>
+</header>
+
+<section class="arc-sec" id="recent">
+  <h2 class="arc-h">Browse posts</h2>
+  <p class="arc-d">Every post since September 2025 can be searched here and narrowed by section, author, date and tag. Posts from {{ $old.first_year }} to {{ $old.last }} are in <a href="#archive">the full archive</a>, further down this page.</p>
+  <form class="arc-f" id="arc-f" role="search" hidden>
+    <label class="arc-q"><span>Search</span><input type="search" id="arc-q" name="q" placeholder="Search titles, text, authors and tags" autocomplete="off"></label>
+    <label><span>Section</span><select id="arc-section" data-all="All sections"></select></label>
+    <label><span>Author</span><select id="arc-editor" data-all="All authors"></select></label>
+    <label><span>Date</span><select id="arc-date" data-all="All dates"></select></label>
+  </form>
+  <p class="arc-tagrow" id="arc-tagrow" hidden><button type="button" class="arc-tagbtn" id="arc-tagbtn" aria-expanded="false" aria-controls="arc-tags">Show tags</button><span id="arc-tagon"></span></p>
+  <div class="arc-tags" id="arc-tags" hidden></div>
+  <p class="arc-status" id="arc-status" aria-live="polite"></p>
+  <ol class="arc-res" id="arc-res"></ol>
+  <p><button type="button" class="arc-more" id="arc-more" hidden>Show more posts</button></p>
+  <p class="arc-older" id="arc-older" hidden>Looking for something from before September 2025? <a href="{{ $old.url }}" rel="noopener">Search the {{ $old.first_year }} to {{ $old.last_year }} archive</a>.</p>
+  <noscript><p class="arc-d">Searching needs JavaScript. Every post is listed under its section in the menu at the top of the page.</p></noscript>
+</section>
+
+<script type="module">
+const $ = id => document.getElementById(id);
+const F = { section: $('arc-section'), author: $('arc-editor'), date: $('arc-date') };
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const FIRST = 10, STEP = 20;
+let pf, results = [], shown = 0, run = 0, tags = [];   // tags: several can be chosen, and a post must have all of them
+const TAGS = 60;   // the panel shows the most used tags; the full list is on the Tags page
+try { pf = await import('{{ "pagefind/pagefind.js" | relURL }}'); await pf.options({ excerptLength: 26 }); await pf.init(); }
+catch (e) { $('arc-status').textContent = 'The search index has not been built yet. Run build.sh.'; }
+if (pf) {
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const all = await pf.filters();
+  const fill = (sel, values) => { sel.innerHTML = ''; sel.add(new Option(sel.dataset.all, '')); values.forEach(v => sel.add(new Option(v, v))); };
+  fill(F.section, Object.keys(all.section || {}).sort());
+  // The Author menu has the editors and the guest contributors, in two groups (Austin, November 26, 2026).
+  const GUESTS = {{ $guests | jsonify | safeJS }};
+  const byLast = (a, b) => a.split(' ').pop().localeCompare(b.split(' ').pop());
+  const names = Object.keys(all.author || {}).sort(byLast);
+  F.author.innerHTML = ''; F.author.add(new Option(F.author.dataset.all, ''));
+  [['Editors', names.filter(n => !GUESTS.includes(n))], ['Contributors', names.filter(n => GUESTS.includes(n))]].forEach(([label, list]) => {
+    if (!list.length) return; const g = document.createElement('optgroup'); g.label = label;
+    list.forEach(n => g.appendChild(new Option(n, n))); F.author.appendChild(g); });
+  // One Date menu: each year, and under it that year's months, newest first (Austin, November 26, 2026: a month with
+  // "all years" made no sense). A year's value is "2026", a month's is "2026-11".
+  F.date.innerHTML = ''; F.date.add(new Option(F.date.dataset.all, ''));
+  const yms = Object.keys(all.ym || {}).sort().reverse();
+  Object.keys(all.year || {}).sort().reverse().forEach(y => {
+    F.date.add(new Option(y, y));
+    yms.filter(k => k.startsWith(y + '-')).forEach(k => F.date.add(new Option('\u2003' + MONTHS[+k.slice(5) - 1] + ' ' + y, k)));
+  });
+  const allYears = Object.keys(all.year || {});
+  const qs = new URLSearchParams(location.search);
+  $('arc-q').value = qs.get('q') || '';
+  F.section.value = qs.get('section') || ''; F.author.value = qs.get('editor') || '';
+  F.date.value = qs.get('date') || '';
+  // Tag panel, closed until asked for. The most used tags, in three sizes by how many posts have them.
+  const tagAll = Object.entries(all.tag || {}).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+  const top = tagAll.slice(0, TAGS), max = top.length ? top[0][1] : 1;
+  tags = qs.getAll('tag').filter(t => all.tag && all.tag[t]);
+  function drawTags() {
+    $('arc-tags').innerHTML = top.slice().sort((a, b) => a[0].localeCompare(b[0])).map(([n, c]) =>
+      '<button type="button" data-tag="' + esc(n) + '" class="t' + (c >= max * .5 ? 3 : c >= max * .2 ? 2 : 1) + (tags.includes(n) ? ' on' : '') + '" aria-pressed="' + tags.includes(n) + '">' + esc(n) + '</button>').join(' ') +
+      (tagAll.length > TAGS ? '<p class="arc-tagall"><a href="{{ "tag/" | relURL }}">All ' + tagAll.length + ' tags</a></p>' : '');
+    $('arc-tagon').innerHTML = tags.map(t => '<span class="arc-chip"><b>' + esc(t) + '</b> <button type="button" class="arc-x-btn" data-untag="' + esc(t) + '" aria-label="Remove the tag ' + esc(t) + '" title="Remove this tag">\u00d7</button></span>').join('');
+  }
+  $('arc-tagrow').hidden = !top.length;
+  $('arc-tagbtn').addEventListener('click', () => { const open = $('arc-tags').hidden; $('arc-tags').hidden = !open;
+    $('arc-tagbtn').textContent = open ? 'Hide tags' : 'Show tags'; $('arc-tagbtn').setAttribute('aria-expanded', open); });
+  $('arc-tags').addEventListener('click', e => { const b = e.target.closest('button[data-tag]'); if (!b) return; const t = b.dataset.tag; tags = tags.includes(t) ? tags.filter(x => x !== t) : tags.concat(t); drawTags(); search(); });
+  $('arc-tagrow').addEventListener('click', e => { const t = e.target.dataset.untag; if (t) { tags = tags.filter(x => x !== t); drawTags(); search(); } });
+  $('arc-f').hidden = false;
+
+  async function more(n) {
+    const mine = run, batch = await Promise.all(results.slice(shown, shown + n).map(r => r.data()));
+    if (mine !== run) return;
+    const q = $('arc-q').value.trim();
+    $('arc-res').insertAdjacentHTML('beforeend', batch.map(d => {
+      const f = d.filters || {};
+      return '<li><a class="line-title" href="' + esc(d.url) + '">' + esc(d.meta.title || '') + '</a>' +
+        (q ? '<p class="arc-x">' + d.excerpt + '</p>' : '') +
+        '<p class="arc-rm">' + (d.meta.date ? '<span>' + esc(d.meta.date) + '</span>' : '<span>' + esc(d.meta.kind || 'Page') + '</span>') +
+        (f.section ? '<span>' + esc(f.section.join(', ')) + '</span>' : '') +
+        (f.author ? '<span>' + esc(f.author.join(', ')) + '</span>' : '') + '</p></li>';
+    }).join(''));
+    shown += batch.length;
+    $('arc-more').hidden = shown >= results.length;
+  }
+  async function search() {
+    const mine = ++run, q = $('arc-q').value.trim();
+    const d = F.date.value;
+    // Posts all have a year. With words in the box and no date chosen, the year rule is left off, so the Library pages and
+    // the About page are found too; they are listed first.
+    const filters = d.length === 7 ? { ym: [d] } : d ? { year: [d] } : q ? {} : { year: { any: allYears } };
+    if (F.section.value) filters.section = [F.section.value];
+    if (F.author.value) filters.author = [F.author.value];
+    if (tags.length) filters.tag = tags;   // a list means every one of them
+    const res = await pf.search(q || null, { filters, sort: { date: 'desc' } });
+    if (mine !== run) return;
+    results = res.results; shown = 0; $('arc-res').innerHTML = '';
+    const narrowed = q || F.section.value || F.author.value || d || tags.length;
+    const n = results.length.toLocaleString('en-US');
+    $('arc-status').innerHTML = !results.length ? 'Nothing matches. <button type="button" class="arc-clear" data-clear>Clear the search</button>'
+      : narrowed ? n + (results.length === 1 ? ' result' : ' results') + ', newest first. <button type="button" class="arc-clear" data-clear>Clear the search</button>'
+      : 'The newest posts. Search or choose a filter to see others.';
+    // Someone looking for a post from before September 2025 would find little here, so say where those are.
+    $('arc-older').hidden = !(narrowed && results.length < 5);
+    const u = new URLSearchParams();
+    if (q) u.set('q', q); if (F.section.value) u.set('section', F.section.value); if (F.author.value) u.set('editor', F.author.value);
+    if (d) u.set('date', d); tags.forEach(t => u.append('tag', t));
+    history.replaceState(null, '', location.pathname + (u.toString() ? '?' + u : '') + location.hash);
+    await more(FIRST);
+  }
+  let t; $('arc-q').addEventListener('input', () => { clearTimeout(t); t = setTimeout(search, 220); });
+  Object.values(F).forEach(s => s.addEventListener('change', search));
+  $('arc-f').addEventListener('submit', e => { e.preventDefault(); search(); });
+  $('arc-more').addEventListener('click', () => more(STEP));
+  $('arc-status').addEventListener('click', e => { if ('clear' in e.target.dataset) { $('arc-q').value = ''; Object.values(F).forEach(s => s.value = ''); tags = []; drawTags(); search(); } });
+  drawTags(); if (qs.get('tags')) $('arc-tagbtn').click();   // /archive/?tags=1 opens the panel
+  search();
+}
+</script>
+
+<section class="arc-sec arc-old" id="archive">
+  <h2 class="arc-h">The full archive, {{ $old.first_year }} to {{ $old.last_year }}</h2>
+  <p class="arc-d">The ImmigrationProf Blog began in {{ $old.first_year }}. Its first twenty years, {{ lang.FormatNumber 0 $old.total }} posts, are kept in a separate archive with its own search and filters for date and category.</p>
+  <p><a class="arc-btn" href="{{ $old.url }}" rel="noopener">Open the {{ $old.first_year }} to {{ $old.last_year }} archive</a></p>
+</section>
+{{ end }}

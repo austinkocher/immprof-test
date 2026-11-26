@@ -1,0 +1,30 @@
+{{- /* The opening text of a post for the lead position: its paragraphs and list items, in order, as plain text.
+       A list item gets a bullet. Opening lines that only repeat the title are skipped, and a first paragraph that opens with the
+       title loses it, since editors often paste the headline at the start of the post. Returns up to ten pieces. */ -}}
+{{- $paras := slice -}}
+{{- $norm := lower .Title | replaceRE `[^a-z0-9]+` " " -}}
+{{- range findRE `(?s)<(p|li)[^>]*>.*?</(p|li)>` .Content -}}
+  {{- $t := . | plainify | htmlUnescape | replaceRE `\s+` " " | strings.TrimSpace -}}
+  {{- $n := lower $t | replaceRE `[^a-z0-9]+` " " | strings.TrimSpace -}}
+  {{- /* A first paragraph that opens with the title and then carries on loses those opening words (case 10 of the tests,
+         November 26, 2026): the words are dropped one at a time until what has been dropped spells the title. */ -}}
+  {{- if and (eq (len $paras) 0) $n (strings.HasPrefix $n (strings.TrimSpace $norm)) (gt (len $n) (len (strings.TrimSpace $norm))) -}}
+    {{- $words := split $t " " -}}{{- $acc := "" -}}{{- $cut := 0 -}}
+    {{- range $i, $w := first 60 $words -}}
+      {{- if not $cut -}}
+        {{- $acc = printf "%s %s" $acc $w | lower | replaceRE `[^a-z0-9]+` " " | strings.TrimSpace -}}
+        {{- if eq $acc (strings.TrimSpace $norm) -}}{{- $cut = add $i 1 -}}{{- end -}}
+      {{- end -}}
+    {{- end -}}
+    {{- if $cut -}}{{- $t = delimit (after $cut $words) " " | strings.TrimSpace -}}{{- $n = lower $t | replaceRE `[^a-z0-9]+` " " | strings.TrimSpace -}}{{- end -}}
+  {{- end -}}
+  {{- if and $t (not (and (eq (len $paras) 0) (in $norm $n))) -}}
+    {{- if strings.HasPrefix . "<li" -}}{{- $t = printf "• %s" $t -}}{{- end -}}
+    {{- $paras = $paras | append $t -}}
+  {{- end -}}
+{{- end -}}
+{{- /* A post whose text is not in paragraphs or a list (2 of the 200 sample posts) gives its plain text as one piece. */ -}}
+{{- if not $paras -}}
+  {{- with .Plain | htmlUnescape | replaceRE `\s+` " " | strings.TrimSpace -}}{{- $paras = slice . -}}{{- end -}}
+{{- end -}}
+{{- return (first 10 $paras) -}}

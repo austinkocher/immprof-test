@@ -1,0 +1,6 @@
+{{- /* Text whose links start at the top of the site ("/some-post/", "/content/files/x.pdf"): post text brought in from
+       Ghost and the Library's file addresses. When the site is published inside a folder of an address, as the test copy
+       is at github.io/immprof-test/, those links get the folder put in front. At a plain address nothing changes. */ -}}
+{{- $b := site.Home.RelPermalink -}}
+{{- if eq $b "/" }}{{ return . }}{{ end -}}
+{{- return (replaceRE `(href|src|poster)="/([^/])` (printf `$1="%s$2` $b) (string .)) -}}

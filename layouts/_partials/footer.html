@@ -1,0 +1,43 @@
+<footer class="footer">
+  {{- /* The top row and the footer share About, Editors, Archive and Library on purpose: a reader who has
+         finished a post looks for them here. Tags, support and the feeds appear only here. The email signup is in the
+         footer on every page but the homepage, which shows it higher up. */ -}}
+  {{ if not .IsHome }}{{ partial "inbox.html" (dict "home" false) }}{{ end }}
+  <ul class="footer-nav">
+    <li><a href="{{ "about/" | relURL }}">About</a></li>
+    <li><a href="{{ "author/" | relURL }}">Editors</a></li>
+    <li><a href="{{ "archive/" | relURL }}#archive">Archive, 2005 to 2025</a></li>
+    <li><a href="{{ "library/" | relURL }}">Library</a></li>
+    <li><a href="{{ "tag/" | relURL }}">Tags</a></li>
+    <li><a href="{{ "about/" | relURL }}">Support ImmigrationProf</a></li>
+    <li><a href="{{ "index.xml" | relURL }}">RSS for the whole site</a></li>
+    <li><a href="{{ "sections/" | relURL }}">RSS by section</a></li>
+  </ul>
+  <div class="footer-credit">
+    <a class="footer-logo" href="https://relevant-research.com"><img src="{{ "brand/rrlogo.png" | relURL }}" alt="Relevant Research" width="1141" height="277"></a>
+    <p class="footer-collab">This project is powered by <a href="https://relevant-research.com">Relevant Research</a>.</p>
+  </div>
+</footer>
+{{- /* Times in the reader's own time zone (Austin, November 26, 2026). The pages are built with US Eastern times, which is what a
+       reader sees with scripts off. This rewrites each marked time for the reader's device: a clock time on the homepage, the full
+       date and time with the zone's short name on a post, and Today, Yesterday or the date on the homepage. */ -}}
+<script>
+(function(){
+  var L='en-US', now=new Date(), yest=new Date(now); yest.setDate(now.getDate()-1);
+  function day(d){return d.getFullYear()+'-'+d.getMonth()+'-'+d.getDate();}
+  document.querySelectorAll('time[data-lt]').forEach(function(t){
+    var d=new Date(t.getAttribute('datetime')); if(isNaN(d)) return;
+    var k=t.getAttribute('data-lt'), tm=d.toLocaleTimeString(L,{hour:'numeric',minute:'2-digit'});
+    if(k==='time'){t.textContent=tm;}
+    else if(k==='full'){
+      var z=''; try{z=new Intl.DateTimeFormat(L,{timeZoneName:'short'}).formatToParts(d).filter(function(p){return p.type==='timeZoneName';})[0].value;}catch(e){}
+      t.textContent=d.toLocaleDateString(L,{month:'long',day:'numeric',year:'numeric'})+', '+tm+(z?' '+z:'');
+    }
+    else if(k==='when'){
+      if(day(d)===day(now)){t.innerHTML='<span class="g-day g-today">Today</span>, '+tm;}
+      else if(day(d)===day(yest)){t.innerHTML='<span class="g-day">Yesterday</span>';}
+      else{t.textContent=d.toLocaleDateString(L,{month:t.hasAttribute('data-long')?'long':'short',day:'numeric'});}
+    }
+  });
+})();
+</script>

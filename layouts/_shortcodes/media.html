@@ -1,0 +1,2 @@
+{{- /* Used by imported posts inside src="...": gives the address of the resized picture. */ -}}
+{{- (partial "img.html" (dict "src" (.Get 0) "w" 1400)).url -}}

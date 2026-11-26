@@ -1,0 +1,37 @@
+{{- /* One Library page, design C (Austin, November 26, 2026): a table of its entries from data/library.json, matched by the
+       page's file name. A column appears only when some entry has something to put in it. The text typed into the page
+       itself is not shown: the entries are the page. */ -}}
+{{- $slug := .File.ContentBaseName -}}
+{{- range where hugo.Data.library.categories "slug" $slug -}}
+{{- $hasBy := false -}}{{- $hasTerm := false -}}{{- $hasBook := false -}}
+{{- range .entries -}}{{- if .by }}{{ $hasBy = true }}{{ end -}}{{- if .term }}{{ $hasTerm = true }}{{ end -}}{{- if .casebook }}{{ $hasBook = true }}{{ end -}}{{- end -}}
+<article class="lib" data-pagefind-body>
+  <span hidden data-pagefind-sort="date:9999-12-31" data-pagefind-meta="kind:Library"></span>
+  <header class="lib-h">
+    <p class="lib-crumb"><a href="{{ "library/" | relURL }}">Library</a></p>
+    <h1>{{ .title }}</h1>
+    <p>{{ .text }}</p>
+  </header>
+  <div class="lib-w">
+    {{ if .entries }}
+    <table class="lc-table">
+      <thead><tr><th>Title</th>{{ if $hasBy }}<th>From</th>{{ end }}{{ if $hasTerm }}<th>Term</th>{{ end }}{{ if $hasBook }}<th>Casebook</th>{{ end }}<th>File</th></tr></thead>
+      <tbody>
+        {{ range .entries }}
+        <tr>
+          <td><a href="{{ if hasPrefix .url "/" }}{{ strings.TrimPrefix "/" .url | relURL }}{{ else }}{{ .url }}{{ end }}" rel="noopener">{{ .title }}</a>{{ with .detail }}<span class="d">{{ . }}</span>{{ end }}</td>
+          {{ if $hasBy }}<td>{{ .by }}</td>{{ end }}
+          {{ if $hasTerm }}<td class="s">{{ .term }}</td>{{ end }}
+          {{ if $hasBook }}<td>{{ if .casebook_url }}<a href="{{ .casebook_url }}" rel="noopener">{{ .casebook }}</a>{{ else }}{{ .casebook }}{{ end }}</td>{{ end }}
+          <td class="f"><a href="{{ if hasPrefix .url "/" }}{{ strings.TrimPrefix "/" .url | relURL }}{{ else }}{{ .url }}{{ end }}" rel="noopener">{{ if eq .type "Link" }}Open{{ else if eq .type "Video" }}Watch{{ else }}Download{{ end }}</a> <span class="s">{{ if or (eq .type "Link") (eq .type "Video") }}{{ replaceRE "^www\\." "" (urls.Parse .url).Hostname }}{{ else }}{{ .type }}, {{ .size }}{{ end }}</span></td>
+        </tr>
+        {{ end }}
+      </tbody>
+    </table>
+    {{ else }}
+    <p class="lib-empty">No items yet.</p>
+    {{ end }}
+  </div>
+</article>
+{{- end -}}
+{{ partial "libshare.html" . }}

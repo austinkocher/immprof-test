@@ -1,0 +1,10 @@
+{{- /* The day label for a post: "Today, 6:05 AM", "Yesterday", or the date for anything older (Austin, November 25, 2026).
+       The page is built with US Eastern times. In the reader's browser, the script in the site's footer rewrites this in the
+       reader's own time zone and against the reader's own "today" (Austin, November 26, 2026).
+       Called with dict "p" post "now" time "long" bool. */ -}}
+{{- $d := .p.Date.Format "2006-01-02" -}}
+<time data-lt="when"{{ if .long }} data-long="1"{{ end }} datetime="{{ .p.Date.Format "2006-01-02T15:04:05-07:00" }}">
+{{- if eq $d (.now.Format "2006-01-02") -}}<span class="g-day g-today">Today</span>, {{ .p.Date.Format "3:04 PM" }}
+{{- else if eq $d ((.now.AddDate 0 0 -1).Format "2006-01-02") -}}<span class="g-day">Yesterday</span>
+{{- else -}}{{ if .long }}{{ .p.Date.Format "January 2" }}{{ else }}{{ .p.Date.Format "Jan 2" }}{{ end }}{{- end -}}
+</time>

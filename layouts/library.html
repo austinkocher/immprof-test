@@ -1,0 +1,31 @@
+{{ define "main" }}
+{{- /* The Library page, design C (Austin, November 26, 2026): a directory. Each of the seven categories shows its first four
+       entries and a link to its own page. Entries are in data/library.json. */ -}}
+<header class="lib-h">
+  <p class="kicker">Teaching materials</p>
+  <h1>Library</h1>
+  <p>Syllabi, exercises, exams and other teaching materials shared by immigration law professors.</p>
+</header>
+<div class="lib-w">
+  {{ range hugo.Data.library.categories }}
+  {{ $n := len .entries }}{{ $url := printf "%s/" .slug | relURL }}
+  <section class="lc-sec">
+    <div>
+      <h2><a href="{{ $url }}">{{ .title }}</a></h2>
+      <p class="n">{{ if eq $n 0 }}No items yet{{ else if eq $n 1 }}1 item{{ else }}{{ $n }} items{{ end }}</p>
+    </div>
+    <div>
+      {{ if .entries }}
+      <ul>
+        {{ range first 4 .entries }}<li>{{ .title }}{{ with .by }}, {{ . }}{{ end }}{{ with .term }}<span>{{ . }}</span>{{ end }}</li>{{ end }}
+      </ul>
+      <p class="more"><a href="{{ $url }}">{{ if gt $n 1 }}All {{ $n }} in {{ .title }}{{ else }}Open {{ .title }}{{ end }}</a></p>
+      {{ else }}
+      <p class="n">{{ .text }}</p>
+      {{ end }}
+    </div>
+  </section>
+  {{ end }}
+</div>
+{{ partial "libshare.html" . }}
+{{ end }}

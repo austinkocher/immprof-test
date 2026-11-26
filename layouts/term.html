@@ -1,0 +1,28 @@
+{{ define "main" }}
+{{- $kind := .Data.Singular -}}
+{{- /* An editor's page lists the editor's own posts. A guest post the editor published is listed on the guest's page. */ -}}
+{{- $posts := .Pages -}}
+{{- if eq $kind "author" -}}{{- $posts = where .Pages "Params.contributors" nil -}}{{- end -}}
+<header class="list-h">
+  <p class="kicker">{{ if eq $kind "author" }}Editor{{ else }}{{ title $kind }}{{ end }}</p>
+  <h1>{{ .Title }}</h1>
+  {{ with .Description }}<p class="list-d">{{ . }}</p>{{ end }}
+  {{ if or (eq $kind "author") (eq $kind "contributor") }}{{ with .Params.bio }}<p class="list-d">{{ . | safeHTML }}</p>{{ end }}{{ end }}
+  <p class="list-m">{{ len $posts }} {{ if eq (len $posts) 1 }}post{{ else }}posts{{ end }} {{ with .OutputFormats.Get "rss" }}<a class="rss" href="{{ .RelPermalink }}">RSS for {{ $.Title }}</a>{{ end }}</p>
+</header>
+{{ if $posts }}
+{{ $pg := .Paginate $posts.ByDate.Reverse }}
+<ol class="rows">
+  {{ range $pg.Pages }}{{ partial "row.html" (dict "p" . "kind" $kind) }}{{ end }}
+</ol>
+{{ if gt $pg.TotalPages 1 }}
+<nav class="pager" aria-label="Pages">
+  {{ if $pg.HasPrev }}<a href="{{ $pg.Prev.URL }}">Newer posts</a>{{ end }}
+  <span>Page {{ $pg.PageNumber }} of {{ $pg.TotalPages }}</span>
+  {{ if $pg.HasNext }}<a href="{{ $pg.Next.URL }}">Older posts</a>{{ end }}
+</nav>
+{{ end }}
+{{ else }}
+<p class="empty">Nothing has been posted in this section yet.</p>
+{{ end }}
+{{ end }}

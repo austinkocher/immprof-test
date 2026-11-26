@@ -1,0 +1,136 @@
+{{ define "main" }}
+{{- /* A news front page in the manner of Ghost's Headline theme (Austin, November 25 and 26, 2026).
+       Top block: the newest post as the lead story, with the next five under "Latest" beside it. Each says "Today", "Yesterday"
+       or its date, so the block is never empty.
+       Lead story: its own opening text fills the space beside the Latest list, trimmed at a whole word by the script at the
+       foot of this page, with a red ellipsis and "continue reading". A picture shows only when it passes the test in
+       _partials/leadpic.html. When the lead is so short that it leaves a lot of space, the second-newest post is shown under
+       it in the same way and the Latest list starts from the third.
+       params.fillParas: "breaks" keeps paragraph breaks; "marks" runs paragraphs together with a red paragraph mark.
+       Without JavaScript the text is clipped at the foot of the space and the second story stays in the Latest list. */ -}}
+{{- /* "now" is the moment the site is built. params.mockNow can pin the clock for a demonstration. */ -}}
+{{- $now := now -}}{{- with site.Params.mockNow }}{{ $now = time.AsTime . }}{{ end -}}
+{{- $posts := where (where site.RegularPages "Type" "posts").ByDate.Reverse "Date" "le" $now -}}
+{{- $top := first 6 $posts -}}
+{{- $lead := index $top 0 -}}
+<section class="g-top">
+  {{ with $lead }}
+  <article class="g-lead">
+    {{ partial "leadstory.html" (dict "p" . "now" $now "h" "h2" "pic" true) }}
+    {{ with index $posts 1 }}<div class="g-second">{{ partial "leadstory.html" (dict "p" . "now" $now "h" "h3" "pic" false) }}</div>{{ end }}
+  </article>
+  {{ end }}
+  <div class="g-side">
+    <h3>Latest</h3>
+    <ol>
+      {{- /* Author names on this page (Austin, November 26, 2026): on the lead story, the second story and the Latest list. The section columns show the date only; names on every post there were "a lot of noise". */ -}}
+      {{- /* Posts two to seven. The seventh shows only when the second has moved under the lead story. */ -}}
+      {{ range $i, $p := first 6 (after 1 $posts) }}
+      <li{{ if eq $i 0 }} class="g-dup"{{ else if eq $i 5 }} class="g-extra"{{ end }}><a href="{{ $p.RelPermalink }}">{{ $p.Title }}</a><span>{{ partial "when.html" (dict "p" $p "now" $now) }}<span class="g-sep">{{ range $j, $a := partial "byline.html" $p }}{{ if $j }}, {{ end }}{{ $a.Title }}{{ end }}</span>{{ with index ($p.GetTerms "sections") 0 }}<span class="g-sep">{{ .Title }}</span>{{ end }}</span></li>
+      {{ end }}
+    </ol>
+  </div>
+</section>
+{{- /* For testing only (HUGO_PARAMS_LEADTEST=1): the lead text of every post, to check the title trimming across the whole set. */ -}}
+{{ if site.Params.leadTest }}<script type="application/json" id="leadtest">{{ $all := slice }}{{ range $posts }}{{ $all = $all | append (dict "slug" .Slug "title" .Title "paras" (partial "leadparas.html" .)) }}{{ end }}{{ $all | jsonify | safeJS }}</script>{{ end }}
+{{- /* The email signup sits between the lead block and the section columns, where it is more prominent (Austin, November 26, 2026).
+       On this page the footer leaves its copy out, so the form appears once. */ -}}
+{{ partial "inbox.html" (dict "home" true) }}
+<section class="g-secs">
+  {{- /* The section whose newest post is the most recent comes first, and so on down to the section that has been quiet the longest
+         (Austin, November 25, 2026). Four fit across, so the top row is the four most recently active sections. The menu in the
+         header keeps its fixed order. */ -}}
+  {{ $secs := slice }}
+  {{ range hugo.Data.sections }}
+    {{ $t := site.GetPage (printf "/sections/%s" (urlize .name)) }}
+    {{ with where $t.Pages.ByDate.Reverse "Date" "le" $now }}{{ $secs = $secs | append (dict "t" $t "newest" (index . 0).Date.Unix) }}{{ end }}
+  {{ end }}
+  {{ range sort $secs "newest" "desc" }}
+  {{ $t := .t }}
+  {{ with first 4 (complement $top (first 60 $t.Pages.ByDate.Reverse)) }}
+  <div class="g-col">
+    <h3><a href="{{ $t.RelPermalink }}">{{ $t.Title }}</a></h3>
+    {{ range $i, $p := . }}
+    {{ if eq $i 0 }}
+    <article class="g-first">
+      {{ with partial "pic.html" (dict "p" $p "w" 600) }}<a class="g-pic" href="{{ $p.RelPermalink }}" tabindex="-1" aria-hidden="true">{{ . }}</a>{{ end }}
+      <h4><a href="{{ $p.RelPermalink }}">{{ $p.Title }}</a></h4>
+      {{- /* The text fill applies to the lead story only (Austin, November 25, 2026). */ -}}
+      <p class="g-ex">{{ $p.Summary | plainify | htmlUnescape | truncate 130 }}</p>
+      <p class="g-by">{{ $p.Date.Format "Jan 2" }}</p>
+    </article>
+    {{ else }}
+    <p class="g-item"><a href="{{ $p.RelPermalink }}">{{ $p.Title }}</a> <span class="g-when">{{ $p.Date.Format "Jan 2" }}</span></p>
+    {{ end }}
+    {{ end }}
+    <p class="g-all"><a href="{{ $t.RelPermalink }}">{{ if eq (len $t.Pages) 1 }}The 1 post{{ else }}All {{ len $t.Pages }} posts{{ end }}</a></p>
+  </div>
+  {{ end }}
+  {{ end }}
+</section>
+<script>
+/* Lead story: fit its opening text to the space beside the Latest list. Whole words only, and when the post runs on, a red
+   ellipsis and a link to the rest. When the whole lead fits on a two-column screen and the space left can hold the headline and
+   date line of the second-newest post, that post is shown under it and its text fitted the same way. Runs again when the window changes size. */
+(function(){
+  var top=document.querySelector('.g-top'), lead=top&&top.querySelector('.g-lead'); if(!lead) return;
+  function esc(t){var d=document.createElement('div');d.textContent=t;return d.innerHTML;}
+  var boxes=[].map.call(lead.querySelectorAll('.g-long'),function(box){
+    var inner=box.querySelector('.g-long-in');
+    var paras=[].map.call(inner.querySelectorAll('p'),function(p){return p.textContent.trim().split(/\s+/);});
+    return {box:box,inner:inner,paras:paras,url:box.dataset.url,marks:box.dataset.paras==='marks',
+            total:paras.reduce(function(n,p){return n+p.length;},0)};
+  });
+  function draw(b,n){
+    var left=n, parts=[];
+    for(var i=0;i<b.paras.length&&left>0;i++){parts.push(esc(b.paras[i].slice(0,left).join(' ')));left-=b.paras[i].length;}
+    var tail=n<b.total?'<span class="g-ell">\u2026</span> <a class="g-cont" href="'+b.url+'">continue reading</a>':'';
+    if(parts.length) parts[parts.length-1]+=tail;
+    b.inner.innerHTML=b.marks?'<p>'+parts.join(' <span class="g-para" aria-hidden="true">\u00b6</span> ')+'</p>':parts.map(function(t){return '<p>'+t+'</p>';}).join('');
+  }
+  /* Returns true when the text had to be cut. When everything fits, the box shrinks to its text so the date line sits under it. */
+  function fit(b){
+    b.box.style.flex=''; b.box.style.minHeight='';
+    draw(b,b.total);
+    if(b.inner.offsetHeight<=b.box.clientHeight){b.box.style.flex='none';b.box.style.minHeight='0';return false;}
+    var lo=1, hi=b.total;
+    while(lo<hi){var mid=Math.ceil((lo+hi)/2); draw(b,mid); if(b.inner.offsetHeight<=b.box.clientHeight){lo=mid;}else{hi=mid-1;}}
+    draw(b,lo);
+    /* Not even one word and the link fit: show no text at all, so nothing is half hidden. */
+    if(b.inner.offsetHeight>b.box.clientHeight){b.inner.innerHTML='';}
+    return true;
+  }
+  var wide=window.matchMedia('(min-width:901px)');
+  function run(){
+    top.classList.remove('two');
+    var state='cut';   /* read only by the test readings below */
+    if(!fit(boxes[0])){
+      state='full';
+      if(boxes.length>1&&wide.matches){
+        /* The second story is shown when its headline and date line fit in the space left, with or without any of its text. */
+        var second=lead.querySelector('.g-second');
+        top.classList.add('two');
+        boxes[1].inner.innerHTML='';
+        if(second.scrollHeight>second.clientHeight+1){top.classList.remove('two');fit(boxes[0]);}
+        else{state=fit(boxes[1])?'two-cut':'two-full';}
+      }
+    }
+    {{ if site.Params.leadTest -}}
+    /* For testing: what the script decided, and how many pixels of text are hidden (0 when all is well). */
+    top.dataset.lead=state;
+    top.dataset.hidden=Math.max.apply(null,boxes.map(function(b){return b.box.offsetParent?Math.max(0,b.inner.offsetHeight-b.box.clientHeight):0;}));
+    var bys=[].filter.call(lead.querySelectorAll('.g-by'),function(e){return e.offsetParent;});
+    top.dataset.gap=Math.round(lead.getBoundingClientRect().bottom-bys[bys.length-1].getBoundingClientRect().bottom);
+    top.dataset.side=Math.round(document.documentElement.scrollWidth-document.documentElement.clientWidth);
+    var widest=null,ww=0;[].forEach.call(document.querySelectorAll('body *'),function(e){var r=e.getBoundingClientRect().right;if(r>ww){ww=r;widest=e;}});
+    top.dataset.widest=widest?(widest.tagName+'.'+widest.className+' '+Math.round(ww)+'/'+document.documentElement.clientWidth):'';
+    {{- end }}
+  }
+  /* The italic and bold faces load only when first used, and a late font changes line lengths, so they are asked for first. */
+  if(document.fonts&&document.fonts.load){
+    Promise.all([document.fonts.load('italic 16px "Noto Serif"'),document.fonts.load('700 16px "Noto Serif"'),document.fonts.ready]).then(run,run);
+  }else{window.addEventListener('load',run);}
+  var t; window.addEventListener('resize',function(){clearTimeout(t);t=setTimeout(run,150);});
+})();
+</script>
+{{ end }}

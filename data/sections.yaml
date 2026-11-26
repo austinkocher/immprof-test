@@ -1,0 +1,51 @@
+# The sixteen sections (Austin, November 26, 2026), in menu order, which is alphabetical. "group" is used by the phone menu,
+# where the sections open in three groups. A post has exactly one section. The rules for choosing are in HANDOFF.md,
+# "To Explain to the Editors".
+- name: Books
+  group: Research and writing
+  blurb: New books on immigration and migration, from the series From the Bookshelves.
+- name: Commentary
+  group: Research and writing
+  blurb: Analysis and argument from the editors and from guest contributors.
+- name: Conferences and Calls
+  group: The field
+  blurb: Conferences, symposia, webinars and lectures, and calls for papers and proposals.
+- name: Creative Works
+  group: Research and writing
+  blurb: Film, photography, art, music and other creative work about immigration.
+- name: Elections
+  group: Law and policy
+  blurb: Campaigns, ballots, results and what they mean for immigration.
+- name: Enforcement
+  group: Law and policy
+  blurb: Arrests, raids, detention, deportation and the conduct of the immigration agencies.
+- name: Immigration Courts
+  group: Law and policy
+  blurb: Immigration judges, the Board of Immigration Appeals and the work of the immigration court system.
+- name: International
+  group: Law and policy
+  blurb: Migration news and policy outside the United States.
+- name: Jobs
+  group: The field
+  blurb: Jobs, fellowships and teaching positions.
+- name: Lawsuits
+  group: Law and policy
+  blurb: Cases in the federal and state courts, from complaints to Supreme Court rulings.
+- name: Legislation
+  group: Law and policy
+  blurb: Bills, hearings, votes and laws in Congress and the state legislatures.
+- name: News
+  group: The field
+  blurb: Immigration news that fits none of the other sections.
+- name: People
+  group: The field
+  blurb: Profiles, the Immigrant of the Day, honors, appointments and remembrances.
+- name: Policy
+  group: Law and policy
+  blurb: What the White House and the federal agencies do and say on immigration.
+- name: Research and Data
+  group: Research and writing
+  blurb: Reports, surveys, data releases and trackers from elsewhere, and original research and data published here.
+- name: Scholarship
+  group: Research and writing
+  blurb: The Immigration Article of the Day, new papers, journal issues and symposia in print.

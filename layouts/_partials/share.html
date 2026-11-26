@@ -1,0 +1,35 @@
+{{- /* Share links with prefilled text: the post title, "via ImmigrationProf Blog", and the post address.
+       Plain links to each platform's own compose page: no tracking scripts, no third-party widgets, no boxes.
+       Each link is a symbol and a name (Austin's choice, November 25, 2026). Icons are in assets/icons (Simple Icons, CC0; Lucide, ISC). */ -}}
+{{- $url := .Params.original_url | default .Permalink -}}
+{{- $text := printf "%s, via ImmigrationProf Blog" .Title -}}
+{{- $both := printf "%s %s" $text $url -}}
+{{- $items := slice
+  (dict "n" "Bluesky" "i" "bluesky" "h" (printf "https://bsky.app/intent/compose?text=%s" (replace (urlquery $both) "+" "%20")))
+  (dict "n" "LinkedIn" "i" "linkedin" "h" (printf "https://www.linkedin.com/sharing/share-offsite/?url=%s" (replace (urlquery $url) "+" "%20")))
+  (dict "n" "Threads" "i" "threads" "h" (printf "https://www.threads.net/intent/post?text=%s" (replace (urlquery $both) "+" "%20")))
+  (dict "n" "X/Twitter" "i" "x" "h" (printf "https://x.com/intent/post?text=%s&url=%s" (replace (urlquery $text) "+" "%20") (replace (urlquery $url) "+" "%20")))
+  (dict "n" "Facebook" "i" "facebook" "h" (printf "https://www.facebook.com/sharer/sharer.php?u=%s" (replace (urlquery $url) "+" "%20")))
+-}}
+<aside class="share" aria-labelledby="share-h" data-pagefind-ignore>
+  <h2 id="share-h">Share</h2>
+  <ul class="share-list">
+    {{- range $items }}
+    <li><a href="{{ .h | safeURL }}" rel="noopener" target="_blank">
+      {{- (resources.Get (printf "icons/%s.svg" .i)).Content | safeHTML }}
+      <span>{{ .n }}</span>
+    </a></li>
+    {{- end }}
+    <li><a href="{{ printf "mailto:?subject=%s&body=%s" (replace (urlquery .Title) "+" "%20") (replace (urlquery $both) "+" "%20") | safeURL }}">
+      {{- (resources.Get "icons/email.svg").Content | safeHTML }}
+      <span>Email</span>
+    </a></li>
+    <li><button type="button" class="share-copy" data-url="{{ $url }}">
+      {{- (resources.Get "icons/link.svg").Content | safeHTML }}
+      <span>Copy link</span>
+    </button></li>
+  </ul>
+</aside>
+<script>
+document.querySelectorAll('.share-copy').forEach(function(b){b.addEventListener('click',function(){navigator.clipboard.writeText(b.dataset.url).then(function(){b.querySelector('span').textContent='Link copied'})})});
+</script>

@@ -1,0 +1,20 @@
+{{- /* Get ImmProf in your inbox: the email signup. One form, shown once on every page: in the footer, and on the homepage
+       under the lead block (dict "home" true), where it is laid out wider. The wording is the same in both places. */ -}}
+<section class="inbox{{ if .home }} inbox-home{{ end }}" aria-labelledby="inbox-h">
+  <div class="inbox-t">
+    <h2 id="inbox-h">Get ImmProf in your inbox</h2>
+    <p class="inbox-n">Free. Cancel anytime with the link at the bottom of every email.</p>
+  </div>
+  <form class="inbox-f" action="{{ "subscribe/" | relURL }}" method="get">
+    <fieldset class="inbox-o">
+      <legend>Choose one or both</legend>
+      <label><input type="checkbox" name="daily" checked> <span><strong>Daily.</strong> Every post from the day before, each morning.</span></label>
+      <label><input type="checkbox" name="weekly"> <span><strong>Weekly.</strong> The ten most-read posts, on Sunday.</span></label>
+    </fieldset>
+    <div class="inbox-r">
+      <label class="inbox-l" for="inbox-e">Email address</label>
+      <input id="inbox-e" type="email" name="email" placeholder="name@example.edu" autocomplete="email">
+      <button type="submit">Sign up</button>
+    </div>
+  </form>
+</section>

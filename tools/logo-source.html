@@ -1,0 +1,19 @@
+<!doctype html><meta charset="utf-8"><link rel="stylesheet" href="/css/site.css"><style>html,body{background:transparent!important;margin:0}.brand{position:absolute;left:100px;top:200px;margin:0;padding:0}.brand-name{font-size:192px!important}</style><div class="brand"><a class="brand-name logo-f1" href="#" aria-label="ImmigrationProf Blog, since 2005">Immig<span class="logo-mid"><span class="logo-bl"></span>ration<span class="logo-prof">Prof</span> <i>Blo</i><span class="logo-yr"><span>SINCE 2005</span></span></span><i class="logo-g">g</i></a>
+    <script>
+    (function(){function place(){document.querySelectorAll('.logo-f1').forEach(function(w){
+      var m=w.querySelector('.logo-mid'),y=m.querySelector('.logo-yr'),t=y.firstElementChild,g=w.querySelector('.logo-g');
+      var size=parseFloat(getComputedStyle(w).fontSize),GAP=size*.16;
+      var base=m.querySelector('.logo-bl').getBoundingClientRect().bottom,top=m.getBoundingClientRect().top;
+      var cs=getComputedStyle(t),c=document.createElement('canvas').getContext('2d');
+      c.font=cs.fontStyle+' '+cs.fontWeight+' '+cs.fontSize+' '+cs.fontFamily;
+      var mk=document.createElement('span');mk.style.cssText='display:inline-block;width:0;height:0';t.appendChild(mk);
+      y.style.top=(base-top)+'px';
+      var capTop=mk.getBoundingClientRect().bottom-c.measureText('S').actualBoundingBoxAscent;
+      y.style.top=(base-top-(capTop-base-GAP))+'px';mk.remove();
+      var gs=getComputedStyle(g);c.font=gs.fontStyle+' '+gs.fontWeight+' '+gs.fontSize+' '+gs.fontFamily;
+      var gLeft=g.getBoundingClientRect().left-c.measureText('g').actualBoundingBoxLeft,trail=parseFloat(cs.letterSpacing)||0;
+      y.style.right='0px';var yr=y.getBoundingClientRect().right-trail;y.style.right=(yr-(gLeft-GAP))+'px';
+    });}
+    if(document.fonts&&document.fonts.ready){document.fonts.ready.then(place);}else{window.addEventListener('load',place);}
+    window.addEventListener('resize',place);})();
+    </script></div>

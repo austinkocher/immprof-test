@@ -1,0 +1,50 @@
+# Editor setup for the ImmigrationProf Blog (Sveltia CMS). Draft, November 25, 2026: written to show how much control
+# the editor gives over a post's address, section and tags. It has not been tried by an editor yet.
+#
+# On this computer: open http://localhost:4176/admin/ in Chrome and choose "Work with Local Repository",
+# then pick the site folder. Posts are saved as files in content/posts.
+backend:
+  name: github
+  repo: OWNER/immprof-site        # to be set when the site has a repository
+  branch: main
+
+media_folder: assets/media
+public_folder: /media
+
+# How an address is made from a title when the editor leaves the address field alone.
+slug:
+  encoding: ascii
+  clean_accents: true
+  sanitize_replacement: "-"
+  maxlength: 80
+
+collections:
+  - name: posts
+    label: Posts
+    label_singular: Post
+    folder: content/posts
+    extension: md
+    format: yaml-frontmatter
+    create: true
+    # The file name, and so the address, comes from the Web address field when it is filled in, and otherwise from the
+    # title at the moment the post is first saved. Editing the title later does not move the post.
+    # Fields run from what an editor fills in on every post down to what rarely changes (Austin, November 25, 2026).
+    slug: "{{fields.slug | default('{{title}}')}}"
+    summary: "{{title}} ({{date}})"
+    sortable_fields: [date, title]
+    fields:
+      - { label: "Title", name: title, widget: string }
+      - { label: "Text", name: body, widget: markdown }
+      - { label: "Section", name: sections, widget: select, multiple: true, min: 1, max: 1, options: ["Books", "Commentary", "Conferences and Calls", "Creative Works", "Elections", "Enforcement", "Immigration Courts", "International", "Jobs", "Lawsuits", "Legislation", "News", "People", "Policy", "Research and Data", "Scholarship"], hint: "One section. If the post is a job, a conference or call, a book, a scholarly article, a report or dataset, a creative work or about a person, that is its section. Commentary is for your own argument. Otherwise choose by subject, and file it under what is new. News is for what fits nowhere else." }
+      - { label: "Tags", name: tags, widget: list, required: false, hint: "Add one to four topics, pressing Add Tags for each. Use a tag from the list at /tag/ where one fits, spelled the same way. A new tag is allowed, and the editors review new tags from time to time." }
+      - { label: "Byline", name: authors, widget: select, multiple: true, min: 1, options: ["Kevin Johnson", "Kit Johnson", "Ingrid Eagly", "Bill Ong Hing", "Ming Chen", "Austin Kocher"], hint: "The editor who wrote the post. For a guest post, choose the editor who is posting it and name the guest under Guest author, near the bottom." }
+      - { label: "Published", name: date, widget: datetime, picker_utc: false }
+      - { label: "Image for sharing (optional)", name: image, widget: image, required: false, hint: "This picture appears when the post is shared. With the field empty, the share card shows the post's title." }
+      - { label: "Wide pictures", name: wide, widget: boolean, default: false, required: false, hint: "Turn on to let landscape photographs in this post run the full width of the page. Upright pictures stay in the text column." }
+      - { label: "Guest author", name: contributors, widget: select, multiple: true, max: 1, required: false, options: ["Cristian Urzola", "D. Carolina Núñez", "Dallin Nielsen", "David Bacon", "David Simmons", "Ediberto Roman", "Gabriella Conversano", "Garrett Webb", "Ghazaleh Fotoohi Ghazvini", "Henna Maiwand", "Jack Chin", "Jialiang Dong", "Matthew Boles", "Michael Fisher", "Nathaniel Austria", "Rachel E. Rosenbloom", "Sadie Stone", "Sam Frost", "Sofia Trevisani", "Taylor Doty", "Yana Gagloeva"], hint: "Only for a guest post. The guest named here is shown as the author, with the Byline editor as the person who posted it. An administrator adds a new guest to this list." }
+      - label: "Web address (URL)"
+        name: slug
+        widget: string
+        required: false
+        hint: "Leave this empty and the address is made from the title when the post is first saved. Fill it in only to choose a shorter one, as lowercase words joined by hyphens. After the post is published the address stays the same, even when the title is edited."
+        pattern: ["^[a-z0-9]+(-[a-z0-9]+)*$", "Lowercase letters, numbers and single hyphens only, with no hyphen at either end"]

@@ -1,0 +1,24 @@
+{{- /* The picture for the lead story, only when it is good enough to show large (Austin, November 26, 2026):
+       at least 800 pixels wide, landscape (between 1.2 and 2.2 times as wide as tall), not animated, and not a nearly blank file
+       (at least 0.025 bytes for each pixel). About one post in ten passes. Returns the picture's address, or nothing.
+       A file Hugo cannot read or resize (a wrong file ending, a damaged file) counts as no picture: without the "try" steps
+       one such file stopped the whole site from building when its post was the newest (found by the 200-post test). */ -}}
+{{- $out := "" -}}
+{{- with .Params.image -}}
+  {{- if not (strings.HasSuffix (lower .) ".svg") -}}
+    {{- with resources.Get . -}}
+      {{- $r := . -}}
+      {{- if and (reflect.IsImageResourceProcessable $r) (not (strings.Contains $r.Content "ANIM")) -}}
+        {{- with try $r.Width -}}{{- if not .Err -}}
+          {{- $w := .Value -}}{{- $hgt := $r.Height -}}
+          {{- $ratio := div (float $w) $hgt -}}
+          {{- $dense := div (float (len $r.Content)) (mul $w $hgt) -}}
+          {{- if and (ge $w 800) (ge $ratio 1.2) (le $ratio 2.2) (ge $dense 0.025) -}}
+            {{- with try ($r.Resize "900x webp") -}}{{- if not .Err -}}{{- $out = .Value.RelPermalink -}}{{- end -}}{{- end -}}
+          {{- end -}}
+        {{- end -}}{{- end -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- return $out -}}

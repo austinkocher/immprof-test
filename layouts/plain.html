@@ -1,0 +1,12 @@
+{{ define "main" }}
+{{- /* A plain page. A page marked "library: true" is one of the seven Library pages and is drawn from data/library.json. */ -}}
+{{ if .Params.library }}
+{{ partial "liblist.html" . }}
+{{ else }}
+<article class="post plain" data-pagefind-body>
+  <span hidden data-pagefind-sort="date:9999-12-31" data-pagefind-meta="kind:Page"></span>
+  <header class="post-h"><h1>{{ .Title }}</h1></header>
+  <div class="post-body">{{ partial "rooted.html" .Content | safeHTML }}</div>
+</article>
+{{ end }}
+{{ end }}

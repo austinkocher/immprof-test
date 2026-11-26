@@ -1,0 +1,45 @@
+{{ define "main" }}
+{{- /* Search (Pagefind) reads only what is inside data-pagefind-body: the title and text of a post.
+       The section, author, tags and year are offered as filters on the search page. */ -}}
+<article class="post" data-pagefind-body{{ with index (.GetTerms "sections") 0 }} data-sec="{{ urlize .Title }}"{{ end }}>
+  <span hidden data-pagefind-filter="year:{{ .Date.Format "2006" }}"></span>
+  <span hidden data-pagefind-filter="ym:{{ .Date.Format "2006-01" }}"></span>
+  <span hidden data-pagefind-meta="date:{{ .Date.Format "January 2, 2006" }}" data-pagefind-sort="date:{{ .Date.Format "2006-01-02" }}"></span>
+  <header class="post-h">
+    {{ with index (.GetTerms "sections") 0 }}<a class="kicker" href="{{ .RelPermalink }}" data-pagefind-filter="section">{{ .Title }}</a>{{ end }}
+    <h1>{{ .Title }}</h1>
+    <p class="byline">
+      {{ $guest := .GetTerms "contributors" }}{{- /* "Posted by" before an editor's name, on the post page only, where there is room (Austin, November 26, 2026). A guest wrote the post and did not post it, so a guest's name has no "Posted by". */ -}}
+      {{ range partial "byline.html" . }}<span class="byline-who">{{ if not $guest }}Posted by {{ end }}<a class="byline-a" href="{{ .RelPermalink }}" data-pagefind-filter="author">{{ .Title }}</a>{{ if $guest }}<span class="byline-g">Guest contributor</span>{{ end }}</span>{{ end }}
+      <time data-lt="full" datetime="{{ .Date.Format "2006-01-02T15:04:05-07:00" }}">{{ .Date.Format "January 2, 2006, 3:04 PM" }} ET</time>
+    </p>
+  </header>
+  <div class="post-body">
+{{ partial "rooted.html" .Content | safeHTML }}
+  </div>
+  {{- /* The banner image, when a post has one, goes below the text so reading starts at once (Austin, November 25, 2026). */ -}}
+  {{ with .Params.image }}{{ $i := partial "img.html" (dict "src" . "w" 1100) }}<figure class="post-img post-img-end"><img src="{{ $i.url }}" alt=""{{ with $i.width }} width="{{ . }}" height="{{ $i.height }}"{{ end }} loading="lazy"></figure>{{ end }}
+  {{- /* A guest author's bio and link, kept on the guest's own page (content/contributors/<name>/_index.md) and shown under every
+         post of theirs. The guest has no login. "Posted by" names the editor in the Byline field, who published the piece. */ -}}
+  {{ range .GetTerms "contributors" }}{{ $lab := .Params.link_label | default .Title }}
+  <aside class="about-author">
+    {{- /* A guest with no bio on file gets no "About the author" heading, only the line naming the editor who posted the piece. */ -}}
+    {{ if or .Params.bio .Params.link }}<h2>About the author</h2>
+    <p>{{ with .Params.bio }}{{ . }} {{ end }}{{ with .Params.link }}<a href="{{ . }}" rel="noopener">{{ $lab }}</a>{{ end }}</p>{{ end }}
+    {{ range $.GetTerms "authors" }}<p class="about-posted">Posted by {{ .Title }}</p>{{ end }}
+  </aside>
+  {{ end }}
+  {{ if site.Params.showSources }}{{ with .Params.sources }}
+  <aside class="sources" aria-labelledby="src-h">
+    <h2 id="src-h">{{ if gt (len .) 1 }}Sources{{ else }}Source{{ end }}</h2>
+    <ol>
+      {{ range . }}<li><a href="{{ .url }}" rel="noopener">{{ .name }}</a> <span class="src-host">{{ replace (urls.Parse .url).Hostname "www." "" }}</span></li>{{ end }}
+    </ol>
+  </aside>
+  {{ end }}{{ end }}
+  {{ with .GetTerms "tags" }}
+  <p class="tags"><span class="tags-l">Tags:</span> {{ range . }}<a href="{{ .RelPermalink }}" data-pagefind-filter="tag">{{ .Title }}</a>{{ end }}</p>
+  {{ end }}
+  {{ partial "share.html" . }}
+</article>
+{{ end }}
