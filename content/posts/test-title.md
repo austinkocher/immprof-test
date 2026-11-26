@@ -6,7 +6,7 @@ tags:
   - Interviews
 authors:
   - Austin Kocher
-date: '2026-11-26T12:20:41-05:00'
+date: '2026-11-26T12:21:07-05:00'
 date_auto: true
 ---
 
