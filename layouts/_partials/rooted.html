@@ -3,4 +3,6 @@
        is at github.io/immprof-test/, those links get the folder put in front. At a plain address nothing changes. */ -}}
 {{- $b := site.Home.RelPermalink -}}
 {{- if eq $b "/" }}{{ return . }}{{ end -}}
-{{- return (replaceRE `(href|src|poster)="/([^/])` (printf `$1="%s$2` $b) (string .)) -}}
+{{- $t := replaceRE `(href|src|poster)="/([^/])` (printf `$1="%s$2` $b) (string .) -}}
+{{- /* Pictures in a post already have the folder, so the step above gave them two; take one back. */ -}}
+{{- return (replace $t (printf `="%s%s` $b (strings.TrimPrefix "/" $b)) (printf `="%s` $b)) -}}
