@@ -2,6 +2,7 @@
 # Drafts: the post form saves a draft as a pull request from a branch of this repository. Each open draft is built
 # as a full copy of the site with the draft in it, at /preview/pr-N/ on the published site, and the address is
 # reported back on the draft's latest change (a commit status named "preview") so the form can link to it.
+# A preview shows a post dated in the future, which the published site leaves out until its time has passed.
 # Pull requests from other people's copies of this repository are never built.
 name: Publish the test site
 on:
@@ -59,7 +60,7 @@ jobs:
             git fetch --quiet --depth 1 origin "pull/$N/head"
             git worktree add --quiet "../pr-$N" FETCH_HEAD
             ln -s "$PWD/resources" "../pr-$N/resources"
-            (cd "../pr-$N" && HUGO_BASEURL="$SITE/preview/pr-$N/" hugo --quiet --destination "$GITHUB_WORKSPACE/public/preview/pr-$N")
+            (cd "../pr-$N" && HUGO_BASEURL="$SITE/preview/pr-$N/" hugo --quiet --buildFuture --buildDrafts --destination "$GITHUB_WORKSPACE/public/preview/pr-$N")
             echo "built the preview for draft $N"
           done < /tmp/drafts.txt
           echo "list=$(tr '\n' ',' < /tmp/drafts.txt)" >> "$GITHUB_OUTPUT"
