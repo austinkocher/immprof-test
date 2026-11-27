@@ -30,4 +30,6 @@
 <link rel="icon" type="image/png" sizes="32x32" href="{{ "brand/mark-32.png" | relURL }}">
 <link rel="icon" type="image/png" sizes="192x192" href="{{ "brand/mark-192.png" | relURL }}">
 <link rel="apple-touch-icon" href="{{ "brand/mark-180.png" | relURL }}">
-<link rel="stylesheet" href="{{ "css/site.css" | relURL }}">
+{{- /* The stylesheet is asked for with the time of the build in its address, so a browser never keeps an old copy after
+       the site is updated (found November 27, 2026: new styles were live and a browser still used the old file). */ -}}
+<link rel="stylesheet" href="{{ "css/site.css" | relURL }}?v={{ now.Unix }}">
