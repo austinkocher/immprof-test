@@ -482,7 +482,7 @@
     var del = $('#w-discard'); if (del) del.addEventListener('click', askDiscard);
     setState(E.pr ? 'Saved' : '');
     if (E.pr) watchPreview();
-    if (!post.title) title.focus();
+    /* A new post opens with no cursor anywhere; the word "Title" clears when the title is clicked (Austin, November 26, 2026). */
   }
 
   function setState(t) { var s = $('.w-state'); if (s) s.textContent = t; }
