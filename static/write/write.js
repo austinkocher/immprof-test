@@ -421,7 +421,7 @@
     };
     E.editor = new toastui.Editor({
       el: $('#w-text'), height: 'auto', minHeight: '26rem', initialEditType: mode, previewStyle: 'tab', hideModeSwitch: true,
-      usageStatistics: false, autofocus: false, placeholder: 'Write the post here.', initialValue: post.body,
+      usageStatistics: false, autofocus: false, placeholder: 'Write the post here.', initialValue: post.body, extendedAutolinks: true,   /* a bare address is a link, as it is on the built site */
       customHTMLRenderer: { card: blockView('Link card', 'card'), video: blockView('Video', 'video') },
       toolbarItems: [[tools.undo, tools.redo], ['heading', 'bold', 'italic'], ['quote', 'ul', 'ol', 'hr'], ['link', tools.picture, tools.file, tools.card, tools.video], [{ name: 'look', tooltip: 'Show how it will read', el: eye }]],
       hooks: { addImageBlobHook: function (blob, done) { var n = pictureName(blob); E.pics[n] = { url: URL.createObjectURL(blob), blob: blob, saved: false }; done(E.pics[n].url, ''); changed(); } },
@@ -503,7 +503,7 @@
       var held = [], md = E.editor.getMarkdown(), names = Object.keys(E.pics);
       names.forEach(function (n, i) { md = md.split('](' + E.pics[n].url + ')').join('](https://stand-in.invalid/' + i + ')'); });
       function hold(html) { held.push(html); return raw('<p>ZZHELD' + (held.length - 1) + 'ZZ</p>')(); }
-      var v = toastui.Editor.factory({ el: tmp, viewer: true, usageStatistics: false, initialValue: md,
+      var v = toastui.Editor.factory({ el: tmp, viewer: true, usageStatistics: false, initialValue: md, extendedAutolinks: true,
         customHTMLRenderer: { card: function (n) { return hold(cardHTML(n.literal || '')); }, video: function (n) { return hold(videoHTML(n.literal || '')); } } });
       var body = document.createElement('div'); body.className = 'post-body';
       var html = (tmp.querySelector('.toastui-editor-contents') || tmp).innerHTML;
