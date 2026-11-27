@@ -15,7 +15,7 @@
     </p>
   </header>
   <div class="post-body">
-{{ partial "rooted.html" .Content | safeHTML }}
+{{ partial "rooted.html" (partial "figures.html" .) | safeHTML }}
   </div>
   {{- /* The banner image, when a post has one, goes below the text so reading starts at once (Austin, November 25, 2026). */ -}}
   {{ with .Params.image }}{{ $i := partial "img.html" (dict "src" . "w" 1100) }}<figure class="post-img post-img-end"><img src="{{ $i.url }}" alt=""{{ with $i.width }} width="{{ . }}" height="{{ $i.height }}"{{ end }} loading="lazy"></figure>{{ end }}

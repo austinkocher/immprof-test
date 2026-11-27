@@ -1,0 +1,36 @@
+{{- /* What a link card shows for one address: the page's own title, description, outlet name and share picture, read from
+       the page when the site is built (Austin, November 26, 2026: "get the share picture from the article"). Call through
+       partialCached with the address, so each address is read once in a build. What is fetched is kept between builds
+       (hugo.toml, caches.getresource). Returns a dict with ok, title, description, site, image (a resized picture or nil).
+       A page that cannot be read gives ok = false, and the card becomes an ordinary link. */ -}}
+{{- $url := . -}}
+{{- $u := urls.Parse $url -}}
+{{- $host := strings.TrimPrefix "www." $u.Hostname -}}
+{{- $out := dict "ok" false "title" "" "description" "" "site" $host "image" false -}}
+{{- $opts := dict "headers" (dict "User-Agent" "Mozilla/5.0 (compatible; link-preview)" "Accept" "text/html,application/xhtml+xml") -}}
+{{- with try (resources.GetRemote $url $opts) -}}
+  {{- with .Err -}}{{- warnf "link card: could not read %s (%s)" $url . -}}{{- end -}}
+  {{- with .Value -}}
+    {{- $html := .Content -}}
+    {{- $title := partial "og.html" (dict "html" $html "keys" (slice "og:title" "twitter:title")) -}}
+    {{- if not $title -}}{{- with findRESubmatch `(?is)<title[^>]*>(.*?)</title>` $html 1 -}}{{- $title = index (index . 0) 1 | htmlUnescape | replaceRE `\s+` " " | strings.TrimSpace -}}{{- end -}}{{- end -}}
+    {{- $desc := partial "og.html" (dict "html" $html "keys" (slice "og:description" "twitter:description" "description")) -}}
+    {{- $site := partial "og.html" (dict "html" $html "keys" (slice "og:site_name")) | default $host -}}
+    {{- $img := partial "og.html" (dict "html" $html "keys" (slice "og:image:secure_url" "og:image" "twitter:image" "twitter:image:src")) -}}
+    {{- $pic := false -}}
+    {{- with $img -}}
+      {{- $src := . -}}
+      {{- if strings.HasPrefix $src "//" -}}{{- $src = printf "https:%s" $src -}}
+      {{- else if strings.HasPrefix $src "/" -}}{{- $src = printf "%s://%s%s" $u.Scheme $u.Host $src -}}{{- end -}}
+      {{- with try (resources.GetRemote $src $opts) -}}
+        {{- with .Value -}}
+          {{- if reflect.IsImageResourceProcessable . -}}
+            {{- with try (.Fill "640x360 webp") -}}{{- with .Value -}}{{- $pic = . -}}{{- end -}}{{- end -}}
+          {{- end -}}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
+    {{- if $title -}}{{- $out = dict "ok" true "title" $title "description" $desc "site" $site "image" $pic -}}{{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- return $out -}}

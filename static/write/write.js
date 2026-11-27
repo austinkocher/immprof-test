@@ -216,7 +216,7 @@
      draft's branch and shown from the browser's memory; the text keeps their real addresses when it is saved. */
   function loadPictures(post, ref) {
     var pics = {}, names = [], re = /\]\(\/media\/([^)\s]+)\)/g, m;
-    while ((m = re.exec(post.body))) if (names.indexOf(m[1]) < 0) names.push(m[1]);
+    while ((m = re.exec(post.body))) if (names.indexOf(m[1]) < 0 && !/\.pdf$/i.test(m[1])) names.push(m[1]);
     return Promise.all(names.map(function (n) {
       return gh.blob(MEDIA + decodeURIComponent(n), ref).then(function (b) { pics[n] = { url: URL.createObjectURL(b), saved: true }; }).catch(function () {});
     })).then(function () {
@@ -282,13 +282,114 @@
       $('#w-text').classList.toggle('is-looking', on);
     }
     eye.addEventListener('click', function () { look(eye.getAttribute('aria-pressed') !== 'true'); });
+    /* More buttons in the formatting bar: undo, redo, a picture with its description and caption, an attached PDF,
+       a link card and a video. Each of the last four opens a small form under the bar. Text colors, sizes, underline
+       and alignment are left out on purpose, so posts keep the site's look (Austin, November 26, 2026). */
+    function tool(label, svg, fn) {
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'w-tool'; b.setAttribute('aria-label', label);
+      b.innerHTML = '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' + svg + '</svg>';
+      b.addEventListener('click', function () { fn(b); });
+      return { name: 'w' + label.replace(/[^a-z]/gi, ''), tooltip: label, el: b };
+    }
+    var pop = document.createElement('form');
+    pop.className = 'w-pop'; pop.hidden = true; pop.noValidate = true;
+    function closePop() { pop.hidden = true; pop.innerHTML = ''; pop.onsubmit = null; }
+    /* fields: [{ id, label, type, placeholder, hint, accept, value }]; done(values, fail) returns true when the form can close */
+    function openPop(title, fields, done) {
+      look(false);
+      pop.innerHTML = '<p class="w-pop-h">' + esc(title) + '</p>' + fields.map(function (f) {
+        return '<label class="w-pop-f"><span>' + esc(f.label) + '</span><input name="' + f.id + '" type="' + (f.type || 'text') + '"' + (f.accept ? ' accept="' + f.accept + '"' : '') +
+          (f.placeholder ? ' placeholder="' + esc(f.placeholder) + '"' : '') + ' value="' + esc(f.value || '') + '" autocomplete="off">' + (f.hint ? '<small>' + esc(f.hint) + '</small>' : '') + '</label>';
+      }).join('') + '<p class="w-pop-e" role="alert"></p><p class="w-pop-b"><button class="w-btn w-primary" type="submit">Add</button><button class="w-btn" type="button" data-x>Cancel</button></p>';
+      pop.hidden = false;
+      pop.querySelector('[data-x]').addEventListener('click', closePop);
+      pop.onsubmit = function (ev) {
+        ev.preventDefault();
+        var v = {}; fields.forEach(function (f) { var i = pop.elements[f.id]; v[f.id] = f.type === 'file' ? (i.files[0] || null) : i.value.trim(); });
+        if (done(v, function (msg) { pop.querySelector('.w-pop-e').textContent = msg; })) closePop();
+      };
+      pop.querySelector('input').focus();
+    }
+    pop.addEventListener('keydown', function (ev) { if (ev.key === 'Escape') { closePop(); E.editor.focus(); } });
+    /* A block (a picture with its caption, a card, a video) goes in at the cursor as a paragraph of its own. */
+    function insertBlock(md) {
+      var ed = E.editor, M = 'ZZINSERTHEREZZ';
+      ed.focus(); ed.insertText(M);
+      var t = ed.getMarkdown(), i = t.indexOf(M);
+      if (i < 0) { t = t + M; i = t.indexOf(M); }
+      var before = t.slice(0, i).replace(/\s+$/, ''), after = t.slice(i + M.length).replace(/^\s+/, '');
+      ed.setMarkdown((before ? before + '\n\n' : '') + md + (after ? '\n\n' + after : '\n'), false);
+      changed();
+    }
+    function keep(file) { var n = pictureName(file); E.pics[n] = { url: URL.createObjectURL(file), blob: file, saved: false }; return E.pics[n].url; }
+    /* How a card or video block looks while writing: a labeled box with the address in it. The real card is drawn when the site is built. */
+    function blockView(label) {
+      return function (node) {
+        var lines = String(node.literal || '').trim().split('\n');
+        return [{ type: 'openTag', tagName: 'div', outerNewLine: true, attributes: { class: 'w-block' } },
+          { type: 'html', content: '<span class="w-block-l">' + esc(label) + '</span><span class="w-block-a">' + esc(lines[0] || '') + '</span>' + lines.slice(1).map(function (l) { return '<span class="w-block-n">' + esc(l) + '</span>'; }).join('') },
+          { type: 'closeTag', tagName: 'div', outerNewLine: true }];
+      };
+    }
+    var isAddress = function (a) { return /^https?:\/\/\S+\.\S+$/i.test(a); };
+    var tools = {
+      undo: tool('Undo', '<path d="M8.5 5.5 4 10l4.5 4.5"/><path d="M4 10h9.5a5.5 5.5 0 0 1 0 11H11"/>', function () { E.editor.exec('undo'); }),
+      redo: tool('Redo', '<path d="M15.5 5.5 20 10l-4.5 4.5"/><path d="M20 10h-9.5a5.5 5.5 0 0 0 0 11H13"/>', function () { E.editor.exec('redo'); }),
+      picture: tool('Picture', '<rect x="3" y="4.5" width="18" height="15" rx="1.5"/><circle cx="8.5" cy="9.5" r="1.6"/><path d="m4 17.5 5-5 4 4 2.5-2.5 4.5 4.5"/>', function () {
+        openPop('Picture', [
+          { id: 'file', label: 'Picture file', type: 'file', accept: 'image/*' },
+          { id: 'alt', label: 'Description', placeholder: 'What the picture shows', hint: 'Read aloud to readers who cannot see the picture. Not shown on the page.' },
+          { id: 'cap', label: 'Caption or credit', placeholder: 'Optional', hint: 'Shown in small type under the picture.' }
+        ], function (v, fail) {
+          if (!v.file) { fail('Choose a picture file.'); return false; }
+          if (!/^image\//.test(v.file.type)) { fail('That file is not a picture.'); return false; }
+          insertBlock('![' + v.alt.replace(/[\[\]]/g, '') + '](' + keep(v.file) + ')' + (v.cap ? '\n*' + v.cap.replace(/\*/g, '\\*') + '*' : ''));
+          return true;
+        });
+      }),
+      file: tool('PDF', '<path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5"/><path d="M10 13h6M10 16.5h6"/>', function () {
+        openPop('PDF', [
+          { id: 'file', label: 'PDF file', type: 'file', accept: 'application/pdf,.pdf' },
+          { id: 'text', label: 'Words of the link', placeholder: 'the decision (PDF)', hint: 'Left empty, the file name is used.' }
+        ], function (v, fail) {
+          if (!v.file) { fail('Choose a PDF file.'); return false; }
+          if (!/\.pdf$/i.test(v.file.name)) { fail('That file is not a PDF.'); return false; }
+          if (v.file.size > 25 * 1024 * 1024) { fail('That file is larger than 25 MB, which is too large to attach here.'); return false; }
+          E.editor.focus();
+          E.editor.exec('addLink', { linkUrl: keep(v.file), linkText: v.text || v.file.name.replace(/\.pdf$/i, '') + ' (PDF)' });
+          changed();
+          return true;
+        });
+      }),
+      card: tool('Link card', '<rect x="2.5" y="6" width="19" height="12" rx="1.5"/><path d="M5.5 10h5.5M5.5 13.5h4"/><rect x="14" y="9" width="5" height="6" fill="currentColor" stroke="none"/>', function () {
+        openPop('Link card', [
+          { id: 'url', label: 'Address of the article', type: 'url', placeholder: 'https://', hint: 'The card shows the article\u2019s own title, description and picture. It appears in the preview after you save.' },
+          { id: 'title', label: 'Title', placeholder: 'Optional', hint: 'Only if you want different words, or if the article\u2019s site does not allow its title to be read.' },
+          { id: 'description', label: 'Description', placeholder: 'Optional' }
+        ], function (v, fail) {
+          if (!isAddress(v.url)) { fail('Paste the full address of the article, starting with https://'); return false; }
+          insertBlock('$$card\n' + v.url + (v.title ? '\ntitle: ' + v.title : '') + (v.description ? '\ndescription: ' + v.description : '') + '\n$$');
+          return true;
+        });
+      }),
+      video: tool('Video', '<rect x="3" y="5.5" width="18" height="13" rx="2"/><path d="M10.5 9.5v5l4.5-2.5z" fill="currentColor"/>', function () {
+        openPop('Video', [{ id: 'url', label: 'Address of the video', type: 'url', placeholder: 'https://www.youtube.com/watch?v=', hint: 'YouTube or Vimeo. The player appears in the preview after you save.' }], function (v, fail) {
+          if (!/(youtube\.com\/(watch\?|embed\/|shorts\/|live\/)|youtu\.be\/|vimeo\.com\/(video\/)?\d+)/i.test(v.url) || !isAddress(v.url)) { fail('Paste the address of a YouTube or Vimeo video.'); return false; }
+          insertBlock('$$video\n' + v.url + '\n$$');
+          return true;
+        });
+      })
+    };
     E.editor = new toastui.Editor({
       el: $('#w-text'), height: 'auto', minHeight: '26rem', initialEditType: mode, previewStyle: 'tab', hideModeSwitch: true,
       usageStatistics: false, autofocus: false, placeholder: 'Write the post here.', initialValue: post.body,
-      toolbarItems: [['heading', 'bold', 'italic'], ['quote', 'ul', 'ol'], ['link', 'image'], [{ name: 'look', tooltip: 'Show how it will read', el: eye }]],
+      customHTMLRenderer: { card: blockView('Link card'), video: blockView('Video') },
+      toolbarItems: [[tools.undo, tools.redo], ['heading', 'bold', 'italic'], ['quote', 'ul', 'ol', 'hr'], ['link', tools.picture, tools.file, tools.card, tools.video], [{ name: 'look', tooltip: 'Show how it will read', el: eye }]],
       hooks: { addImageBlobHook: function (blob, done) { var n = pictureName(blob); E.pics[n] = { url: URL.createObjectURL(blob), blob: blob, saved: false }; done(E.pics[n].url, ''); changed(); } },
       events: { change: function () { if (E) changed(); } }
     });
+    (function () { var bar = $('#w-text .toastui-editor-toolbar'); if (bar) bar.parentNode.insertBefore(pop, bar.nextSibling); })();
     function showMode() { $all('.w-mode button').forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-mode') === mode ? 'true' : 'false'); }); $('#w-text').classList.toggle('is-markdown', mode === 'markdown'); }
     $all('.w-mode button').forEach(function (b) { b.addEventListener('click', function () { look(false); mode = b.getAttribute('data-mode'); E.editor.changeMode(mode, true); store.set('mode', mode); showMode(); }); });
     showMode();
@@ -396,7 +497,7 @@
     chain = chain.then(function () {
       var body = realAddresses(p.body, E.pics), todo = Object.keys(E.pics).filter(function (n) { return !E.pics[n].saved && body.indexOf('](/media/' + n + ')') >= 0; });
       p.body = body;
-      return todo.reduce(function (c, n) { return c.then(function () { return fileToB64(E.pics[n].blob).then(function (b) { return gh.put(MEDIA + n, b, branch(), 'Add a picture to “' + p.title + '”'); }).then(function () { E.pics[n].saved = true; }); }); }, Promise.resolve());
+      return todo.reduce(function (c, n) { return c.then(function () { return fileToB64(E.pics[n].blob).then(function (b) { return gh.put(MEDIA + n, b, branch(), (/\.pdf$/i.test(n) ? 'Add a file to “' : 'Add a picture to “') + p.title + '”'); }).then(function () { E.pics[n].saved = true; }); }); }, Promise.resolve());
     }).then(function () {
       if (!E.lead) return;
       return fileToB64(E.lead.blob).then(function (b) { return gh.put(MEDIA + E.lead.name, b, branch(), 'Add the main picture to “' + p.title + '”'); }).then(function () { p.image = '/media/' + E.lead.name; E.lead = null; });

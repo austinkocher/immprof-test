@@ -1,0 +1,11 @@
+{{- /* A video. Called with the text of a video block: a YouTube or Vimeo address.
+       The player is shown in the post. YouTube is asked for its no-cookie player. Any other address becomes a link. */ -}}
+{{- $url := strings.TrimSpace . -}}
+{{- $src := "" -}}
+{{- with findRESubmatch `(?i)(?:youtube\.com/(?:watch\?(?:[^\s#]*&)?v=|embed/|shorts/|live/)|youtu\.be/)([A-Za-z0-9_-]{6,})` $url 1 -}}{{- $src = printf "https://www.youtube-nocookie.com/embed/%s" (index (index . 0) 1) -}}{{- end -}}
+{{- if not $src -}}{{- with findRESubmatch `(?i)vimeo\.com/(?:video/)?(\d+)` $url 1 -}}{{- $src = printf "https://player.vimeo.com/video/%s" (index (index . 0) 1) -}}{{- end -}}{{- end -}}
+{{- if $src }}
+<figure class="video"><iframe src="{{ $src }}" title="Video" loading="lazy" allow="fullscreen; picture-in-picture; encrypted-media" allowfullscreen></iframe></figure>
+{{- else if findRE `^https?://\S+$` $url }}
+<p><a href="{{ $url }}" rel="noopener">{{ $url }}</a></p>
+{{- end -}}

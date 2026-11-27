@@ -66,7 +66,8 @@
 .w-text .toastui-editor-defaultUI-toolbar{justify-content:center}
 .w-text .toastui-editor-defaultUI-toolbar button{border-color:transparent;border-radius:0;background-color:var(--bg)}
 .w-text .toastui-editor-defaultUI-toolbar button:not(:disabled):hover{background-color:var(--tint);border-color:transparent}
-.w-text .toastui-editor-toolbar-divider{background:var(--rule)}
+.w-text .toastui-editor-toolbar-divider{background:var(--rule);margin-left:8px;margin-right:8px}
+.w-text .toastui-editor-defaultUI-toolbar button.toastui-editor-toolbar-icons{margin-left:2px;margin-right:2px}
 .w-text .toastui-editor-main,.w-text .toastui-editor-md-container,.w-text .toastui-editor-ww-container{background:transparent}
 .w-text .toastui-editor-contents,.w-text .toastui-editor-ww-container .ProseMirror{font:1.14rem/1.7 var(--read);color:var(--ink)}
 .w-text .toastui-editor-ww-container .ProseMirror,.w-text .toastui-editor-md-container .ProseMirror{padding:1.4rem 0 3rem;min-height:26rem;height:auto}
@@ -81,7 +82,32 @@
 .w-text .toastui-editor-contents img{display:block;max-width:100%;height:auto;max-height:36rem;margin:0 auto}
 .w-text .toastui-editor-md-container .ProseMirror{font:1rem/1.7 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--ink)}
 .w-text .toastui-editor-md-tab-container{display:none!important}
-.w-text .w-eye{display:none;width:32px;height:32px;margin:0 5px;padding:0;align-items:center;justify-content:center;border:0;background:none;color:#555;cursor:pointer}
+/* buttons added to the formatting bar, and the small form each one opens under it */
+.w-text .w-tool{display:inline-flex;width:32px;height:32px;margin:0 2px;padding:0;align-items:center;justify-content:center;border:0;background:none;color:#555;cursor:pointer}
+.w-text .w-tool:hover{background-color:var(--tint)}
+.w-pop{max-width:30rem;margin:0 auto;padding:1rem 1.1rem;background:var(--tint);font:.84rem var(--ui);color:var(--ink)}
+.w-pop-h{margin:0 0 .6rem;font-weight:700}
+.w-pop-f{display:block;margin:0 0 .7rem}
+.w-pop-f span{display:block;font-weight:600;margin-bottom:.2rem}
+.w-pop-f input{box-sizing:border-box;width:100%;font:inherit;padding:.4rem .5rem;border:1px solid var(--rule);background:var(--bg);color:var(--ink)}
+.w-pop-f input[type=file]{padding:.3rem;background:transparent;border:0}
+.w-pop-f small{display:block;margin-top:.2rem;color:var(--meta);font-size:.76rem;line-height:1.4}
+.w-pop-e{margin:0 0 .5rem;color:var(--accent);font-weight:600}
+.w-pop-e:empty{display:none}
+.w-pop-b{margin:0;display:flex;gap:.5rem}
+/* in the text: a caption under a picture, a divider, and the blocks that become a link card or a video */
+.w-text .toastui-editor-contents p:has(> img) > em,.w-text .toastui-editor-contents p:has(> img) + p:has(> em:first-child) > em{display:block;font:normal .82rem/1.45 var(--ui);color:var(--meta);text-align:center;margin-top:.45rem}
+.w-text .toastui-editor-contents p:has(> img) > br{display:none}
+.w-text .toastui-editor-contents hr{border:0;border-top:1px solid var(--rule);margin:2em 0}
+.w-text .toastui-editor-contents .w-block{display:block;background:var(--frame);border:1px solid var(--rule);padding:.75rem 1rem;margin:0 0 1em;font:.84rem/1.5 var(--ui);color:var(--ink);overflow-wrap:anywhere}
+.w-text .toastui-editor-contents .w-block span{display:block}
+.w-text .toastui-editor-contents .w-block-l{font-weight:600;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--meta)}
+.w-text .toastui-editor-contents .w-block-n{color:var(--meta)}
+.w-text .toastui-editor-contents .toastui-editor-custom-block{margin:0 0 1em;padding:0}
+.w-text .toastui-editor-contents .toastui-editor-custom-block-view{padding:0}
+.w-text .toastui-editor-contents p:has(> img):has(+ p > em:first-child){margin-bottom:0}
+.w-text .toastui-editor-contents .toastui-editor-custom-block .w-block{margin:0}
+.w-text .w-eye{display:none;width:32px;height:32px;margin:0 2px;padding:0;align-items:center;justify-content:center;border:0;background:none;color:#555;cursor:pointer}
 .w-text.is-markdown .w-eye{display:inline-flex}
 .w-text .w-eye[aria-pressed=true]{background-color:var(--tint);color:var(--accent)}
 .w-text.is-looking .toastui-editor-toolbar-group:not(:last-child),.w-text.is-looking .toastui-editor-toolbar-divider{opacity:.35;pointer-events:none}

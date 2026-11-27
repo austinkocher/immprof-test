@@ -1,0 +1,11 @@
+{{- /* Captions. In a Markdown post, a line in italics directly under a picture is that picture's caption or credit
+       (the "Picture" button on the writing page writes it that way). The picture and its line become a figure with a caption.
+       Links are allowed inside a caption. Imported posts are left as they are. */ -}}
+{{- $c := string .Content -}}
+{{- $md := false -}}{{- with .File -}}{{- if eq .Ext "md" -}}{{- $md = true -}}{{- end -}}{{- end -}}
+{{- if and $md (strings.Contains $c "<img") -}}
+  {{- $cap := `((?:[^<]|<a [^>]*>|</a>)*)` -}}
+  {{- $c = replaceRE (printf `<p>(<img [^>]*>)\s*(?:<br\s*/?>\s*)?<em>%s</em></p>` $cap) `<figure>$1<figcaption>$2</figcaption></figure>` $c -}}
+  {{- $c = replaceRE (printf `<p>(<img [^>]*>)</p>\s*<p><em>%s</em></p>` $cap) `<figure>$1<figcaption>$2</figcaption></figure>` $c -}}
+{{- end -}}
+{{- return $c -}}

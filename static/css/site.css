@@ -52,6 +52,20 @@ h1,h2,h3,p{margin:0}
 .post-body .kg-bookmark-icon{width:16px;height:16px;vertical-align:-2px;margin-right:.35rem}
 .post-body .kg-bookmark-thumbnail{flex:0 0 96px}
 .post-body .kg-bookmark-thumbnail img{display:block;width:96px;height:96px;object-fit:cover}
+/* A link card: the article's outlet, title, description and share picture, in one box that links to it. */
+.post-body .linkcard{display:flex;border:1px solid var(--rule);background:var(--frame);color:var(--ink);text-decoration:none;margin:0 0 1em}
+.post-body .linkcard-t{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:.3rem;padding:.9rem 1.1rem}
+.post-body .linkcard-site{font:600 .72rem var(--ui);letter-spacing:.06em;text-transform:uppercase;color:var(--meta)}
+.post-body .linkcard-title{font-weight:700;font-size:1.02em;line-height:1.3}
+.post-body .linkcard-desc{font-size:.84em;line-height:1.45;color:var(--meta);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.post-body .linkcard-pic{flex:0 0 38%;max-width:17rem;display:block}
+.post-body .linkcard-pic img{display:block;width:100%;height:100%;max-height:none;object-fit:cover;margin:0}
+.post-body .linkcard:hover .linkcard-title{text-decoration:underline}
+@media (max-width:34rem){.post-body .linkcard{flex-direction:column-reverse}.post-body .linkcard-pic{flex:none;max-width:none}.post-body .linkcard-pic img{aspect-ratio:16/9}}
+/* A caption or credit under a picture, a video, and a divider between parts of a post. */
+.post-body figcaption{font:.82rem/1.45 var(--ui);color:var(--meta);text-align:center;margin-top:.45rem}
+.post-body figure.video{margin:0 0 1em}
+.post-body hr{border:0;border-top:1px solid var(--rule);margin:2em auto;width:100%}
 .sources ol{list-style:none}
 .signup fieldset{border:0;padding:0;margin:0 0 1rem}
 .signup legend{padding:0;margin-bottom:.5rem;font-weight:700}

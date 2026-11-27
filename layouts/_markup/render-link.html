@@ -1,0 +1,8 @@
+{{- /* A link in a Markdown post. A link to a file the editor attached (a PDF kept with the pictures, "/media/name.pdf")
+       gets the file's published address, which is what publishes the file. Every other link is written the usual way. */ -}}
+{{- $href := .Destination -}}
+{{- if strings.HasPrefix $href "/media/" -}}
+  {{- with resources.Get (strings.TrimPrefix "/" $href) -}}{{- $href = .RelPermalink -}}{{- end -}}
+{{- end -}}
+<a href="{{ $href | safeURL }}"{{ with .Title }} title="{{ . }}"{{ end }}>{{ .Text }}</a>
+{{- /**/ -}}

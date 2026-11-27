@@ -1,0 +1,20 @@
+{{- /* One value from a web page's own description of itself. Call: partial "og.html" (dict "html" $html "keys" (slice "og:title" "twitter:title")).
+       Returns the first value found, as plain text, or "". Pages write these lines with the name first or the value first,
+       in double or single quotes, so all four forms are tried. */ -}}
+{{- $html := .html -}}
+{{- $out := "" -}}
+{{- range .keys -}}
+  {{- if not $out -}}
+    {{- $k := replace . "." `\.` -}}
+    {{- range slice
+        (printf `(?is)<meta[^>]+(?:property|name)\s*=\s*["']%s["'][^>]*?content\s*=\s*"([^"]*)"` $k)
+        (printf `(?is)<meta[^>]+(?:property|name)\s*=\s*["']%s["'][^>]*?content\s*=\s*'([^']*)'` $k)
+        (printf `(?is)<meta[^>]+content\s*=\s*"([^"]*)"[^>]*?(?:property|name)\s*=\s*["']%s["']` $k)
+        (printf `(?is)<meta[^>]+content\s*=\s*'([^']*)'[^>]*?(?:property|name)\s*=\s*["']%s["']` $k) -}}
+      {{- if not $out -}}
+        {{- with findRESubmatch . $html 1 -}}{{- $out = index (index . 0) 1 | htmlUnescape | htmlUnescape | replaceRE `\s+` " " | strings.TrimSpace -}}{{- end -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- return $out -}}

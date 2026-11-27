@@ -1,0 +1,23 @@
+{{- /* A link card. Called with the lines of a card block: the article's address on the first line. The title, description, outlet and picture come from the article itself (layouts/_partials/linkcard.html).
+       Lines under the address can replace what was read:  title: ...   description: ...   picture: no
+       The card has no paragraph inside it, so its words stay out of the homepage's opening text. */ -}}
+{{- $lines := split (strings.TrimSpace .) "\n" -}}
+{{- $url := strings.TrimSpace (index $lines 0) -}}
+{{- $set := dict -}}
+{{- range after 1 $lines -}}
+  {{- with findRESubmatch `^\s*(title|description|picture)\s*:\s*(.*?)\s*$` . 1 -}}{{- $set = merge $set (dict (index (index . 0) 1) (index (index . 0) 2)) -}}{{- end -}}
+{{- end -}}
+{{- if findRE `^https?://\S+$` $url -}}
+  {{- $c := partialCached "linkcard.html" $url $url -}}
+  {{- $title := $set.title | default $c.title -}}
+  {{- $desc := $set.description | default $c.description -}}
+  {{- $pic := $c.image -}}{{- if in (slice "no" "none" "off") (lower ($set.picture | default "")) -}}{{- $pic = false -}}{{- end -}}
+  {{- if $title }}
+<a class="linkcard{{ if $pic }} has-pic{{ end }}" href="{{ $url }}" rel="noopener">
+  <span class="linkcard-t"><span class="linkcard-site">{{ $c.site }}</span><span class="linkcard-title">{{ $title }}</span>{{ with $desc }}<span class="linkcard-desc">{{ . }}</span>{{ end }}</span>
+  {{ with $pic }}<span class="linkcard-pic"><img src="{{ .RelPermalink }}" alt="" width="{{ .Width }}" height="{{ .Height }}" loading="lazy"></span>{{ end }}
+</a>
+  {{- else }}
+<p><a href="{{ $url }}" rel="noopener">{{ $url }}</a></p>
+  {{- end -}}
+{{- end -}}

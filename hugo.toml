@@ -42,6 +42,11 @@ summaryLength = 40
 
 [markup.goldmark.renderer]
   unsafe = true
+# A link card or a video in a post is a block between two lines of two dollar signs (layouts/_markup/render-passthrough.html).
+[markup.goldmark.extensions.passthrough]
+  enable = true
+  [markup.goldmark.extensions.passthrough.delimiters]
+    block = [['$$', '$$']]
 
 [params]
   description = "The ImmigrationProf Blog is a source of timely updates on news, policy, law, and research."
@@ -64,6 +69,12 @@ summaryLength = 40
   quality = 82
 [imaging.jpeg]
   quality = 82
+
+# Link cards read each article's title, description and share picture when the site is built. What is read is kept with
+# the resized pictures, so a later build does not ask the article's site again and a card does not change by itself.
+[caches.getresource]
+  dir = ":resourceDir/_gen"
+  maxAge = -1
 
 # For testing: "hugo --renderSegments home" builds the homepage alone.
 [segments.home]
