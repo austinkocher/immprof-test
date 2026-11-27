@@ -1,23 +1,34 @@
 {{ define "main" }}
-{{- /* One year: its months with counts, then every post of the year under its month, newest month first. */ -}}
+{{- /* One year. Each month is a line that opens to show its posts, newest month first, so the page is twelve lines long
+       until a reader opens a month (Austin, November 27, 2026: "one page per year is fine but maybe collapsable months").
+       A link to #m03 opens March. The two buttons open or close every month, which keeps the browser's own
+       "find on page" useful for a whole year. Without scripts the months still open and close. */ -}}
 {{- $posts := where (partial "posts.html" .) "Params.year" .Params.year -}}
 {{- $months := $posts.GroupByDate "2006-01" -}}
 <header class="list-h">
-  <p class="kicker"><a href="{{ "year/" | relURL }}">Posts by year</a></p>
+  <p class="kicker"><a href="{{ site.Home.RelPermalink }}#years">Posts by year</a></p>
   <h1>{{ .Title }}</h1>
-  <p class="list-m">{{ lang.FormatNumber 0 (len $posts) }} {{ if eq (len $posts) 1 }}post{{ else }}posts{{ end }}</p>
-  <ul class="months">
-    {{ range $months }}{{ $d := (index .Pages 0).Date }}<li><a href="#m{{ $d.Format "01" }}">{{ $d.Format "January" }}</a> <span class="terms-n">{{ len .Pages }}</span></li>{{ end }}
-  </ul>
+  <p class="list-m">{{ lang.FormatNumber 0 (len $posts) }} {{ if eq (len $posts) 1 }}post{{ else }}posts{{ end }} in {{ len $months }} {{ if eq (len $months) 1 }}month{{ else }}months{{ end }}. Choose a month to see its posts.</p>
+  {{ if gt (len $months) 1 }}<p class="month-all"><button type="button" data-months="open">Open all months</button> <button type="button" data-months="close">Close all months</button></p>{{ end }}
 </header>
 {{ range $months }}{{ $d := (index .Pages 0).Date }}
-<section class="month" id="m{{ $d.Format "01" }}">
-  <h2>{{ $d.Format "January 2006" }} <span class="terms-n">{{ len .Pages }} {{ if eq (len .Pages) 1 }}post{{ else }}posts{{ end }}</span></h2>
+<details class="month" id="m{{ $d.Format "01" }}"{{ if eq (len $months) 1 }} open{{ end }}>
+  <summary><h2>{{ $d.Format "January 2006" }}</h2> <span class="terms-n">{{ len .Pages }} {{ if eq (len .Pages) 1 }}post{{ else }}posts{{ end }}</span></summary>
   <ol class="lines">
     {{ range .Pages }}<li><a class="line-title" href="{{ .RelPermalink }}">{{ .Title }}</a><span class="line-m">{{ partial "day.html" . }}, {{ .Params.category }}</span></li>
     {{ end }}
   </ol>
-</section>
+</details>
 {{ end }}
+<script>
+(function () {
+  var months = document.querySelectorAll('details.month');
+  function openHash() { var m = location.hash && document.getElementById(location.hash.slice(1)); if (m && m.tagName === 'DETAILS') { m.open = true; m.scrollIntoView(); } }
+  window.addEventListener('hashchange', openHash); openHash();
+  document.querySelectorAll('[data-months]').forEach(function (b) {
+    b.addEventListener('click', function () { var on = b.getAttribute('data-months') === 'open'; months.forEach(function (m) { m.open = on; }); });
+  });
+})();
+</script>
 {{ partial "yearnav.html" . }}
 {{ end }}

@@ -9,7 +9,7 @@ Nothing here has been committed, pushed or published yet.
 
 * `hugo.toml` holds the settings. The address the site is built for is set on the build line.
 * `content/post/` has one file per post (19,863), in the HTML TypePad stored. Each post is at `/post/<basename>/`, the address it has on archive.immprof.com today, and its old TypePad address `/immigration/YYYY/MM/<basename>.html` is kept as a second address that sends the reader on.
-* `content/year/` has one page per year (20 years: 2005, 2006, and 2008 to 2025). A year's page lists its months with counts and every post of the year.
+* `content/year/` has one page per year (20 years: 2005, 2006, and 2008 to 2025). A year's page lists its months, each with a count; a month opens to show its posts.
 * `content/category/` has one page per TypePad category (14), named exactly as TypePad named them, 100 posts to a page.
 * `layouts/` holds the templates, and `static/css/archive.css` the one stylesheet. The fonts and the logo are copies from the new site (`static/fonts/`, `static/brand/`).
 * `tools/` holds the download, import and checking scripts.
@@ -98,6 +98,22 @@ Count: 0.
 No record was left out. In every damaged record the reader's comment went into the author and date fields only; the title and the text are the post's own, so each of the 896 was repaired and kept.
 A damaged record with no title or no text of its own would be left out and listed in `data/left_out.json`.
 
+## Decisions and changes
+
+Decisions are Austin's, with the date and his words where he gave them.
+
+* **A standalone archive, not merged into the new site** (November 27, 2026). The old categories and names differ from the new sections: "I still think we should have a standalone archive that isn't merged in". It is to be a part of the new website at an address of its own ("let's keep it as a standalone subpage of the new website"). Until then it is published on the earlier test site under `/historical/`.
+* **First build** (November 27, 2026). All 19,863 posts, the 14 old categories kept as named, byline "Immigration Prof", the new site's design. He called it "excellent".
+* **One central page** (November 27, 2026). "just one central page", then "one landing page and then drill into years on a new page is fine". The front page is the one way in: search, the list of years, the list of categories. The separate list-of-years page (`/year/`) and list-of-categories page (`/category/`) are gone; those two addresses now lead to the front page's lists (`layouts/section.html`), and the "Years" and "Categories" links are out of the top row. Each year and each category still has its own page.
+* **Months that open and close on a year's page** (November 27, 2026). "one page per year is fine but maybe collapsable months or something". Each month is a line with its count that opens to show its posts; two buttons open or close every month; a link to `#m03` opens March (`layouts/year.html`, styles in `static/css/archive.css`).
+* **Readers' email addresses printed in posts stay removed** (November 27, 2026: "removing email addresses is fine"). Eight addresses in 23 posts read "[email address removed]".
+* **Nameplate** (November 27, 2026: "nameplate is fine"). The new site's logo with "Archive, 2005 to 2025" under it.
+* **Footer** (November 27, 2026: "footer with RR is fine"). The Relevant Research credit stays.
+* **Damaged posts** (November 27, 2026). "we can fix the damaged posts once you get it up and running too". The repairs made so far are under "Repairs made by the import"; the 915 posts with no known day are the ones still to look at.
+
+Open: whether each old category keeps a page of its own or the front page's category list should open a search for that category; whether the second addresses (old TypePad paths) are wanted; about 1,800 picture tags on other hosts, some of them dead.
+
+
 ## Limits
 
 * The export is thin before 2010: 4 posts from 2005, 2 from 2006, none from 2007, 3 from 2008 and 123 from 2009. The blog began in September 2005, so roughly its first four years are missing from the source.
@@ -106,5 +122,5 @@ A damaged record with no title or no text of its own would be left out and liste
 * "Related articles" boxes that the recommendation service added under posts remain as plain lists of links, without their thumbnails.
 * 25 addresses inside post text start at the top of the host (for example `/wiki/...`, pasted from another site). They were dead on TypePad too and are unchanged.
 * 24 posts name, in their own title or text, the reader whose comment damaged the record (the reader is the post's author or subject). Those names are part of the posts and are unchanged.
-* A year's page lists every post of that year on one page; the largest, 2017, lists 1,657.
+* A year's page holds every post of that year (the largest, 2017, has 1,657), folded into months that open one at a time or all at once. The page's file is still large: 2017 is about 470 KB.
 * The second addresses (`/immigration/YYYY/MM/<basename>.html`) are one small page each, which doubles the number of post files. They matter only if the archive is later served at an address where the old TypePad paths can arrive.

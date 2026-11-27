@@ -69,9 +69,17 @@ h1,h2,h3,p{margin:0}
 .terms-n{font:.78rem var(--ui);font-variant-numeric:tabular-nums;color:var(--meta)}
 .months{display:flex;flex-wrap:wrap;gap:.3rem 1.4rem;margin-top:.9rem;font:.9rem var(--ui)}
 .months .terms-n{margin-left:.25rem}
-.month{margin-top:2.2rem;scroll-margin-top:1rem}
-.month h2{font:700 1.45rem/1.2 var(--hl);padding-bottom:.5rem;border-bottom:1px solid var(--rule)}
-.month h2 .terms-n{margin-left:.6rem;font-weight:400}
+/* A year page: each month is a line that opens to show its posts */
+.month{scroll-margin-top:1rem;border-bottom:1px solid var(--rule)}
+.month summary{display:flex;align-items:baseline;gap:.7rem;padding:.8rem 0;cursor:pointer;list-style:none}
+.month summary::-webkit-details-marker{display:none}
+.month summary::before{content:"+";flex:none;width:1rem;font:700 1.2rem/1 var(--ui);color:var(--accent)}
+.month[open] summary::before{content:"\2212"}
+.month summary h2{font:700 1.3rem/1.2 var(--hl);margin:0}
+.month summary:hover h2{text-decoration:underline}
+.month .lines{margin-top:0;padding-bottom:1.2rem}
+.month-all{margin-top:.9rem}
+.month-all button{font:.9rem var(--ui);background:none;border:0;padding:0;margin-right:1.2rem;color:inherit;text-decoration:underline;cursor:pointer}
 
 /* A post in a list: its title, then the date */
 .lines li{padding:.7rem 0;border-bottom:1px solid var(--rule)}

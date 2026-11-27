@@ -1,7 +1,14 @@
-{{ define "main" }}
-{{- /* The two index pages: /year/ and /category/. */ -}}
-<header class="list-h">
-  <h1>{{ .Title }}</h1>
-</header>
-{{ if eq .Section "year" }}{{ partial "years.html" . }}{{ else }}{{ partial "categories.html" . }}{{ end }}
-{{ end }}
+{{- /* /year/ and /category/ have no page of their own: the archive has one central page, its front page, which lists the
+       years and the categories (Austin, November 27, 2026: "just one central page"). These two addresses lead there. */ -}}
+{{- $to := printf "%s#%s" site.Home.RelPermalink (cond (eq .Section "year") "years" "categories") -}}
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>{{ .Title }}</title>
+<link rel="canonical" href="{{ site.Home.Permalink }}">
+<meta name="robots" content="noindex">
+<meta http-equiv="refresh" content="0; url={{ $to }}">
+</head>
+<body><p><a href="{{ $to }}">{{ .Title }}</a></p></body>
+</html>
