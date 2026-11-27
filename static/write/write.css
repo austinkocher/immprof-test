@@ -63,6 +63,7 @@
 .w-text .toastui-editor-defaultUI{border:0;border-radius:0;font-family:var(--ui)}
 .w-text .toastui-editor-defaultUI-toolbar{background:var(--bg);border:0;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);border-radius:0;padding:0;position:sticky;top:3.1rem;z-index:20}
 .w-text .toastui-editor-toolbar{height:auto}
+.w-text .toastui-editor-defaultUI-toolbar{justify-content:center}
 .w-text .toastui-editor-defaultUI-toolbar button{border-color:transparent;border-radius:0;background-color:var(--bg)}
 .w-text .toastui-editor-defaultUI-toolbar button:not(:disabled):hover{background-color:var(--tint);border-color:transparent}
 .w-text .toastui-editor-toolbar-divider{background:var(--rule)}
