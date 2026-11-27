@@ -1,4 +1,6 @@
 {{ define "main" }}
+{{- /* The page's own script and styles are asked for with the time of the build in their address, so a browser never
+       keeps an old copy after the site is updated (found November 26, 2026: a fix was live and the browser still ran the old file). */ -}}
 {{- /* The editors' writing page (Austin, November 26, 2026: the first form was "really cold", "the actual editor area is
        really small", "the layout and design are really out of step with the website"). The form is laid out like the post
        page itself: section, title, byline, text, tags. It saves each post as a draft in the site's repository, the same
@@ -9,11 +11,11 @@
 {{- $guests := slice }}{{ range site.Taxonomies.contributors.Alphabetical }}{{ $guests = $guests | append .Page.Title }}{{ end -}}
 <meta name="robots" content="noindex, nofollow">
 <link rel="stylesheet" href="{{ "write/vendor/toastui-editor.min.css" | relURL }}">
-<link rel="stylesheet" href="{{ "write/write.css" | relURL }}">
+<link rel="stylesheet" href="{{ "write/write.css" | relURL }}?v={{ now.Unix }}">
 <div id="write" class="write"><p class="w-note">Loading the writing page.</p></div>
 <noscript><p>The writing page needs JavaScript.</p></noscript>
 <script type="application/json" id="write-data">{{ dict "repo" site.Params.editorRepo "branch" site.Params.editorBranch "site" site.Params.editorSite "sections" $sections "tags" $tags "authors" $authors "guests" $guests "outlets" hugo.Data.outlets.outlets | jsonify | safeJS }}</script>
 <script src="{{ "write/vendor/js-yaml.min.js" | relURL }}"></script>
 <script src="{{ "write/vendor/toastui-editor-all.min.js" | relURL }}"></script>
-<script src="{{ "write/write.js" | relURL }}"></script>
+<script src="{{ "write/write.js" | relURL }}?v={{ now.Unix }}"></script>
 {{ end }}
