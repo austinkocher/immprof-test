@@ -1,0 +1,129 @@
+{
+ "_note": "Outlets for link cards. \"refuses\": the outlet did not let the site read its pages when tested on November 26, 2026, so its page is not asked for and its card shows this name, the logo when one is on file, and the headline the editor typed. Logos are public-domain wordmarks from Wikimedia Commons.",
+ "outlets": {
+  "nytimes.com": {
+   "name": "The New York Times",
+   "refuses": true,
+   "logo": "outlets/nytimes.svg",
+   "logo_source": "Wikimedia Commons, File:The New York Times Logo.svg (Public domain)"
+  },
+  "washingtonpost.com": {
+   "name": "The Washington Post",
+   "refuses": true,
+   "logo": "outlets/washingtonpost.svg",
+   "logo_source": "Wikimedia Commons, File:The Logo of The Washington Post Newspaper.svg (Public domain)"
+  },
+  "apnews.com": {
+   "name": "Associated Press",
+   "refuses": true,
+   "logo": "outlets/apnews.svg",
+   "logo_source": "Wikimedia Commons, File:Associated Press logo 2012.svg (Public domain)"
+  },
+  "theatlantic.com": {
+   "name": "The Atlantic",
+   "refuses": true,
+   "logo": "outlets/theatlantic.svg",
+   "logo_source": "Wikimedia Commons, File:The Atlantic magazine logo.svg (Public domain)"
+  },
+  "reuters.com": {
+   "name": "Reuters",
+   "refuses": true,
+   "logo": "outlets/reuters.svg",
+   "logo_source": "Wikimedia Commons, File:Reuters logo 2024.svg (Public domain)"
+  },
+  "politico.com": {
+   "name": "Politico",
+   "refuses": true,
+   "logo": "outlets/politico.svg",
+   "logo_source": "Wikimedia Commons, File:Politico-logo 2024 red.svg (Public domain)"
+  },
+  "wsj.com": {
+   "name": "The Wall Street Journal",
+   "refuses": true,
+   "logo": "outlets/wsj.svg",
+   "logo_source": "Wikimedia Commons, File:The Wall Street Journal Logo.svg (Public domain)"
+  },
+  "npr.org": {
+   "name": "NPR",
+   "refuses": true,
+   "logo": "outlets/npr.svg",
+   "logo_source": "Wikimedia Commons, File:National Public Radio logo.svg (Public domain)"
+  },
+  "axios.com": {
+   "name": "Axios",
+   "refuses": true,
+   "logo": "outlets/axios.svg",
+   "logo_source": "Wikimedia Commons, File:Axios logo (2020).svg (Public domain)"
+  },
+  "themarshallproject.org": {
+   "name": "The Marshall Project",
+   "refuses": true,
+   "logo": "outlets/themarshallproject.svg",
+   "logo_source": "Wikimedia Commons, File:The Marshall Project logo.svg (Public domain)"
+  },
+  "usatoday.com": {
+   "name": "USA Today",
+   "refuses": true,
+   "logo": "outlets/usatoday.svg",
+   "logo_source": "Wikimedia Commons, File:USA Today (2020-01-29).svg (Public domain)"
+  },
+  "thehill.com": {
+   "name": "The Hill",
+   "refuses": true,
+   "logo": "outlets/thehill.svg",
+   "logo_source": "Wikimedia Commons, File:The Hill (2020-01-15).svg (Public domain)"
+  },
+  "miamiherald.com": {
+   "name": "Miami Herald",
+   "refuses": true,
+   "logo": "outlets/miamiherald.svg",
+   "logo_source": "Wikimedia Commons, File:Miami Herald logo.svg (Public domain)"
+  },
+  "forbes.com": {
+   "name": "Forbes",
+   "refuses": true,
+   "logo": "outlets/forbes.svg",
+   "logo_source": "Wikimedia Commons, File:Forbes logo.svg (Public domain)"
+  },
+  "cato.org": {
+   "name": "Cato Institute",
+   "refuses": true,
+   "logo": "outlets/cato.svg",
+   "logo_source": "Wikimedia Commons, File:Cato Institute.svg (Public domain)"
+  },
+  "startribune.com": {
+   "name": "The Minnesota Star Tribune",
+   "refuses": true,
+   "logo": "outlets/startribune.svg",
+   "logo_source": "Wikimedia Commons, File:Star Tribune Logo.svg (Public domain)"
+  },
+  "azcentral.com": {
+   "name": "The Arizona Republic",
+   "refuses": true,
+   "logo": "outlets/azcentral.svg",
+   "logo_source": "Wikimedia Commons, File:The Arizona Republic logo.svg (Public domain)"
+  },
+  "elpasotimes.com": {
+   "name": "El Paso Times",
+   "refuses": true,
+   "logo": "outlets/elpasotimes.svg",
+   "logo_source": "Wikimedia Commons, File:El Paso Times logo.svg (Public domain)"
+  },
+  "lawfaremedia.org": {
+   "name": "Lawfare",
+   "refuses": true
+  },
+  "courtlistener.com": {
+   "name": "CourtListener",
+   "refuses": true
+  },
+  "borderreport.com": {
+   "name": "Border Report",
+   "refuses": true
+  },
+  "scotusblog.com": {
+   "name": "SCOTUSblog",
+   "refuses": false
+  }
+ }
+}

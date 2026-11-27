@@ -1,5 +1,9 @@
-{{- /* A link card. Called with the lines of a card block: the article's address on the first line. The title, description, outlet and picture come from the article itself (layouts/_partials/linkcard.html).
+{{- /* A link card. Called with the lines of a card block: the article's address on the first line. The title, description,
+       outlet and picture come from the article itself (layouts/_partials/linkcard.html).
        Lines under the address can replace what was read:  title: ...   description: ...   picture: no
+       Some outlets do not let their pages be read (data/outlets.json, "refuses"). Their pages are not asked for. Such a
+       card shows the outlet's name from that list, its logo where one is on file (assets/outlets), and the headline the
+       editor typed (Austin, November 26, 2026: "create another fallback version ... the name and logo").
        The card has no paragraph inside it, so its words stay out of the homepage's opening text. */ -}}
 {{- $lines := split (strings.TrimSpace .) "\n" -}}
 {{- $url := strings.TrimSpace (index $lines 0) -}}
@@ -8,16 +12,22 @@
   {{- with findRESubmatch `^\s*(title|description|picture)\s*:\s*(.*?)\s*$` . 1 -}}{{- $set = merge $set (dict (index (index . 0) 1) (index (index . 0) 2)) -}}{{- end -}}
 {{- end -}}
 {{- if findRE `^https?://\S+$` $url -}}
-  {{- $c := partialCached "linkcard.html" $url $url -}}
-  {{- $title := $set.title | default $c.title -}}
+  {{- $host := strings.TrimPrefix "www." (urls.Parse $url).Hostname -}}
+  {{- $outlet := dict -}}
+  {{- range $dom, $o := hugo.Data.outlets.outlets -}}
+    {{- if or (eq $host $dom) (strings.HasSuffix $host (printf ".%s" $dom)) -}}{{- $outlet = $o -}}{{- end -}}
+  {{- end -}}
+  {{- $c := dict "ok" false "title" "" "description" "" "site" $host "image" false -}}
+  {{- if not $outlet.refuses -}}{{- $c = partialCached "linkcard.html" $url $url -}}{{- end -}}
+  {{- $site := $outlet.name | default $c.site -}}
+  {{- $title := $set.title | default $c.title | default (printf "Read the article at %s" $site) -}}
   {{- $desc := $set.description | default $c.description -}}
   {{- $pic := $c.image -}}{{- if in (slice "no" "none" "off") (lower ($set.picture | default "")) -}}{{- $pic = false -}}{{- end -}}
-  {{- if $title }}
-<a class="linkcard{{ if $pic }} has-pic{{ end }}" href="{{ $url }}" rel="noopener">
-  <span class="linkcard-t"><span class="linkcard-site">{{ $c.site }}</span><span class="linkcard-title">{{ $title }}</span>{{ with $desc }}<span class="linkcard-desc">{{ . }}</span>{{ end }}</span>
+  {{- $logo := false -}}
+  {{- if not $c.ok -}}{{- with $outlet.logo -}}{{- with resources.Get . -}}{{- $logo = . -}}{{- end -}}{{- end -}}{{- end }}
+<a class="linkcard{{ if or $pic $logo }} has-pic{{ end }}" href="{{ $url }}" rel="noopener">
+  <span class="linkcard-t"><span class="linkcard-site">{{ $site }}</span><span class="linkcard-title">{{ $title }}</span>{{ with $desc }}<span class="linkcard-desc">{{ . }}</span>{{ end }}</span>
   {{ with $pic }}<span class="linkcard-pic"><img src="{{ .RelPermalink }}" alt="" width="{{ .Width }}" height="{{ .Height }}" loading="lazy"></span>{{ end }}
+  {{- if not $pic }}{{ with $logo }}<span class="linkcard-pic linkcard-logo"><img src="{{ .RelPermalink }}" alt="" loading="lazy"></span>{{ end }}{{ end }}
 </a>
-  {{- else }}
-<p><a href="{{ $url }}" rel="noopener">{{ $url }}</a></p>
-  {{- end -}}
 {{- end -}}
