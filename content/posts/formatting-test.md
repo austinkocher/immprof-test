@@ -5,8 +5,7 @@ sections:
 tags: []
 authors:
   - Austin Kocher
-date: '2026-11-26T22:55:00-05:00'
-date_auto: true
+date: '2026-11-27T11:38:33+05:45'
 ---
 
 This draft shows each of the new formatting buttons on the writing page. It is a test and is not published. The seven link cards below are real articles from this week. The first three outlets let the site read the article. The last four do not, so each shows its name, its logo and a headline pasted by the editor.
