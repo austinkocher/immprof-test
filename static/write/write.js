@@ -241,7 +241,7 @@
     root.innerHTML =
       '<div class="w-bar"><a class="w-back" href="#/">Drafts</a><span class="w-state" aria-live="polite"></span>' +
       '<span class="w-bar-b"><span class="w-mode" role="group" aria-label="How the text is shown"><button type="button" data-mode="wysiwyg">Formatted</button><button type="button" data-mode="markdown">Markdown</button></span>' +
-      '<button class="w-btn" type="button" id="w-save">Save draft</button>' +
+      '<button class="w-btn" type="button" id="w-view" aria-pressed="false">Preview</button><button class="w-btn" type="button" id="w-save">Save draft</button>' +
       '<button class="w-btn w-primary" type="button" id="w-publish">Publish</button></span></div>' +
       '<div class="w-status" aria-live="polite"></div>' +
       '<article class="w-post">' +
@@ -267,7 +267,8 @@
         '<span class="w-hint">Leave empty and the address is made from the title. It stays the same after the first save.</span></div>') +
       (E.pr ? '<div class="w-field"><button class="w-link w-danger" type="button" id="w-discard">Delete this draft</button></div>' : '') +
       '</div></details>' +
-      '</article>';
+      '</article>' +
+      '<div class="w-viewwrap" hidden><p class="w-viewnote">This is how the post will read. A link card from an outlet that lets its articles be read shows the article\u2019s own title and picture after you save, in the built preview.</p><article class="post w-view"></article></div>';
 
     /* the text */
     var mode = store.get('mode') === 'markdown' ? 'markdown' : 'wysiwyg';
@@ -474,6 +475,72 @@
     $('#w-lead').addEventListener('change', function (ev) { var f = ev.target.files[0]; if (!f) return; E.lead = { name: pictureName(f), blob: f, url: URL.createObjectURL(f) }; drawLead(); changed(); });
     drawLead();
     if (post.image && E.pr) gh.blob(MEDIA + post.image.replace(/^\/media\//, ''), PREFIX + E.slug).then(function (b) { if (E && !E.lead && post.image) { var s = $('.w-picname'); if (s) s.outerHTML = '<img src="' + URL.createObjectURL(b) + '" alt="">'; } }).catch(function () {});
+
+    /* The instant preview: the post in the site's own look, drawn in the browser with no save and no wait
+       (Austin, November 26, 2026). Pictures, captions, videos and dividers are as they will be. A card from an outlet
+       that refuses to be read is as it will be; any other card shows its address until the site is built. */
+    function cardHTML(text) {
+      var lines = text.trim().split('\n'), url = (lines[0] || '').trim(), set = {};
+      lines.slice(1).forEach(function (l) { var m = /^\s*(title|description|picture)\s*:\s*(.*?)\s*$/.exec(l); if (m) set[m[1]] = m[2]; });
+      var o = outletOf(url), host = ''; try { host = new URL(url).hostname.replace(/^www\./, ''); } catch (e) {}
+      var dom = ''; Object.keys(D.outlets || {}).forEach(function (d) { if (host === d || host.slice(-d.length - 1) === '.' + d) dom = d; });
+      var site = (o && o.name) || host, refuses = !!(o && o.refuses), logo = refuses && (D.logos || {})[dom];
+      var title = set.title || (refuses ? 'Read the article at ' + site : 'The article’s own headline and picture appear here after you save.');
+      var desc = set.description || (refuses ? '' : url);
+      return '<a class="linkcard' + (logo ? ' has-pic' : '') + '" href="' + esc(url) + '" target="_blank" rel="noopener"><span class="linkcard-t"><span class="linkcard-site">' + esc(site) + '</span><span class="linkcard-title">' + esc(title) + '</span>' +
+        (desc ? '<span class="linkcard-desc">' + esc(desc) + '</span>' : '') + '</span>' + (logo ? '<span class="linkcard-pic linkcard-logo"><img src="' + esc(logo) + '" alt=""></span>' : '') + '</a>';
+    }
+    function videoHTML(text) {
+      var url = text.trim(), m = /(?:youtube\.com\/(?:watch\?(?:[^\s#]*&)?v=|embed\/|shorts\/|live\/)|youtu\.be\/)([A-Za-z0-9_-]{6,})/i.exec(url), src = m ? 'https://www.youtube-nocookie.com/embed/' + m[1] : '';
+      if (!src) { m = /vimeo\.com\/(?:video\/)?(\d+)/i.exec(url); if (m) src = 'https://player.vimeo.com/video/' + m[1]; }
+      return src ? '<figure class="video"><iframe src="' + src + '" title="Video" loading="lazy" allowfullscreen></iframe></figure>' : '<p><a href="' + esc(url) + '">' + esc(url) + '</a></p>';
+    }
+    function raw(html) { return function () { return [{ type: 'openTag', tagName: 'div', outerNewLine: true }, { type: 'html', content: html }, { type: 'closeTag', tagName: 'div', outerNewLine: true }]; }; }
+    function drawView() {
+      var box = $('.w-view'), tmp = document.createElement('div');
+      /* The library that turns the text into a page removes players and addresses it does not know, so cards, videos
+         and the pictures and files held in the browser go through it as stand-ins and are put back afterwards. */
+      var held = [], md = E.editor.getMarkdown(), names = Object.keys(E.pics);
+      names.forEach(function (n, i) { md = md.split('](' + E.pics[n].url + ')').join('](https://stand-in.invalid/' + i + ')'); });
+      function hold(html) { held.push(html); return raw('<p>ZZHELD' + (held.length - 1) + 'ZZ</p>')(); }
+      var v = toastui.Editor.factory({ el: tmp, viewer: true, usageStatistics: false, initialValue: md,
+        customHTMLRenderer: { card: function (n) { return hold(cardHTML(n.literal || '')); }, video: function (n) { return hold(videoHTML(n.literal || '')); } } });
+      var body = document.createElement('div'); body.className = 'post-body';
+      var html = (tmp.querySelector('.toastui-editor-contents') || tmp).innerHTML;
+      v.destroy();
+      html = html.replace(/<p>ZZHELD(\d+)ZZ<\/p>/g, function (m, i) { return held[+i] || ''; });
+      names.forEach(function (n, i) { html = html.split('https://stand-in.invalid/' + i + '"').join(E.pics[n].url + '"'); });
+      body.innerHTML = html;
+      /* a line in italics directly under a picture is its caption */
+      $all('img', body).forEach(function (img) {
+        var par = img.parentNode; if (!par || par.tagName !== 'P') return;
+        var kids = [].filter.call(par.childNodes, function (n) { return !(n.nodeType === 3 && !n.textContent.trim()) && n.tagName !== 'BR'; }), cap = null;
+        if (kids.length === 2 && kids[0] === img && kids[1].tagName === 'EM') cap = kids[1];
+        else if (kids.length === 1) { var nx = par.nextElementSibling; if (nx && nx.tagName === 'P' && nx.children.length === 1 && nx.firstElementChild.tagName === 'EM' && nx.textContent.trim() === nx.firstElementChild.textContent.trim()) { cap = nx.firstElementChild; nx.parentNode.removeChild(nx); } }
+        if (!cap) return;
+        var fig = document.createElement('figure'), fc = document.createElement('figcaption');
+        fc.innerHTML = cap.innerHTML; fig.appendChild(img); fig.appendChild(fc); par.parentNode.replaceChild(fig, par);
+      });
+      $all('a', body).forEach(function (a) { a.target = '_blank'; a.rel = 'noopener'; });
+      var sec = $('#w-sec').value, who = $('#w-author').value, guest = $('#w-guest').value, when = $('input[name="w-when"]:checked').value === 'set' && $('#w-date').value ? new Date($('#w-date').value) : new Date();
+      var day = when.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) + ', ' + when.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+      var leadImg = E.lead ? E.lead.url : (($('.w-pic img') || {}).src || '');
+      box.innerHTML = '<header class="post-h">' + (sec ? '<span class="kicker">' + esc(sec) + '</span>' : '') + '<h1>' + (esc($('#w-title').value.trim()) || 'Title') + '</h1><p class="byline">' +
+        (guest ? '<span class="byline-who"><span class="byline-a">' + esc(guest) + '</span><span class="byline-g">Guest contributor</span></span>' : (who ? '<span class="byline-who">Posted by <span class="byline-a">' + esc(who) + '</span></span>' : '')) +
+        '<time>' + esc(day) + '</time></p></header>';
+      box.appendChild(body);
+      if (leadImg) box.insertAdjacentHTML('beforeend', '<figure class="post-img post-img-end"><img src="' + esc(leadImg) + '" alt=""></figure>');
+      if (guest && who) box.insertAdjacentHTML('beforeend', '<aside class="about-author"><p class="about-posted">Posted by ' + esc(who) + '</p></aside>');
+      if (post.tags.length) box.insertAdjacentHTML('beforeend', '<p class="tags"><span class="tags-l">Tags:</span> ' + post.tags.map(function (t) { return '<a>' + esc(t) + '</a>'; }).join('') + '</p>');
+    }
+    function showView(on) {
+      if (on) { closePop(); drawView(); }
+      $('.w-post').hidden = on; $('.w-viewwrap').hidden = !on;
+      $('.w-mode').style.display = on ? 'none' : '';
+      var b = $('#w-view'); b.textContent = on ? 'Back to writing' : 'Preview'; b.setAttribute('aria-pressed', on ? 'true' : 'false');
+      window.scrollTo(0, Math.max(0, $('.w-bar').getBoundingClientRect().top + window.scrollY - 8));
+    }
+    $('#w-view').addEventListener('click', function () { showView($('#w-view').getAttribute('aria-pressed') !== 'true'); });
 
     $all('#w-sec,#w-author,#w-guest,#w-share,#w-wide,#w-date,#w-slug,input[name="w-when"]').forEach(function (el) { el.addEventListener('input', changed); el.addEventListener('change', changed); });
     $('#w-date').addEventListener('input', function () { $('input[name="w-when"][value="set"]').checked = true; });

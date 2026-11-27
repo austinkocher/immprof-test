@@ -50,6 +50,13 @@
 
 /* the post */
 .w-post{max-width:46rem;margin:0 auto}
+/* the instant preview: the post in the site's own look */
+.w-viewwrap{max-width:46rem;margin:0 auto}
+.w-viewnote{font:.8rem/1.45 var(--ui);color:var(--meta);background:var(--tint);padding:.6rem .9rem;margin:0 0 2rem}
+.w-view{text-align:left}
+.w-view .post-h{text-align:center}
+.w-view .tags a{cursor:default}
+.w-btn[aria-pressed=true]{background:var(--tint)}
 .w-post-h{text-align:center;margin:1rem 0 1.5rem}
 .w-sec{font:700 .82rem var(--ui);color:var(--accent);background:transparent;border:0;border-bottom:1px solid var(--rule);padding:.2rem .1rem;text-align:center;text-align-last:center;cursor:pointer}
 .w-title{display:block;width:100%;box-sizing:border-box;resize:none;overflow:hidden;border:0;background:transparent;color:var(--ink);font:700 2.9rem/1.12 var(--hl);letter-spacing:-.015em;text-align:center;margin:.6rem 0 1rem;padding:0}
