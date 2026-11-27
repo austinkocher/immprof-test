@@ -107,12 +107,13 @@ Decisions are Austin's, with the date and his words where he gave them.
 * **One central page** (November 27, 2026). "just one central page", then "one landing page and then drill into years on a new page is fine". The front page is the one way in: search, the list of years, the list of categories. The separate list-of-years page (`/year/`) and list-of-categories page (`/category/`) are gone; those two addresses now lead to the front page's lists (`layouts/section.html`), and the "Years" and "Categories" links are out of the top row. Each year and each category still has its own page.
 * **Months that open and close on a year's page** (November 27, 2026). "one page per year is fine but maybe collapsable months or something". Each month is a line with its count that opens to show its posts; two buttons open or close every month; a link to `#m03` opens March (`layouts/year.html`, styles in `static/css/archive.css`).
 * **A trail back to the front page** (November 27, 2026). "use breadcrumb menu or something so that when you go into the years and months you can get back to the archive landing page". A year, a category and a post each show a trail above the title, for example "Archive, Posts by year, 2014, June" on a post, each step a link; June opens that month on the year's page (`layouts/_partials/crumbs.html`).
+* **Categories work the same as years** (November 27, 2026: "categories should work the same as years"). Each old category keeps a page of its own, reached from the front page's list, with the trail back. A category's posts are spread over numbered pages of 100, newest first, since the largest, Current Affairs, has 16,396.
 * **Readers' email addresses printed in posts stay removed** (November 27, 2026: "removing email addresses is fine"). Eight addresses in 23 posts read "[email address removed]".
 * **Nameplate** (November 27, 2026: "nameplate is fine"). The new site's logo with "Archive, 2005 to 2025" under it.
 * **Footer** (November 27, 2026: "footer with RR is fine"). The Relevant Research credit stays.
 * **Damaged posts** (November 27, 2026). "we can fix the damaged posts once you get it up and running too". The repairs made so far are under "Repairs made by the import"; the 915 posts with no known day are the ones still to look at.
 
-Open: whether each old category keeps a page of its own or the front page's category list should open a search for that category; whether the second addresses (old TypePad paths) are wanted; about 1,800 picture tags on other hosts, some of them dead.
+Open: whether the second addresses (old TypePad paths) are wanted; about 1,800 picture tags on other hosts, some of them dead.
 
 
 ## Limits
