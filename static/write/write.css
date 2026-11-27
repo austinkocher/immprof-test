@@ -79,7 +79,11 @@
 .w-text .toastui-editor-contents ol>li::before{color:var(--ink)}
 .w-text .toastui-editor-contents img{display:block;max-width:100%;height:auto;max-height:36rem;margin:0 auto}
 .w-text .toastui-editor-md-container .ProseMirror{font:1rem/1.7 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--ink)}
-.w-text .toastui-editor-md-tab-container{background:var(--bg);border-bottom:1px solid var(--rule)}
+.w-text .toastui-editor-md-tab-container{display:none!important}
+.w-text .w-eye{display:none;width:32px;height:32px;margin:0 5px;padding:0;align-items:center;justify-content:center;border:0;background:none;color:#555;cursor:pointer}
+.w-text.is-markdown .w-eye{display:inline-flex}
+.w-text .w-eye[aria-pressed=true]{background-color:var(--tint);color:var(--accent)}
+.w-text.is-looking .toastui-editor-toolbar-group:not(:last-child),.w-text.is-looking .toastui-editor-toolbar-divider{opacity:.35;pointer-events:none}
 .w-text .toastui-editor-md-preview{padding:1.4rem 0}
 .w-text .placeholder{color:#b9b2a6}
 

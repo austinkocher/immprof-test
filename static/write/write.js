@@ -271,15 +271,26 @@
 
     /* the text */
     var mode = store.get('mode') === 'markdown' ? 'markdown' : 'wysiwyg';
+    /* In Markdown, an eye in the toolbar shows the text as it will read, in place of the editor's own Write and Preview tabs. */
+    var eye = document.createElement('button');
+    eye.type = 'button'; eye.className = 'w-eye'; eye.setAttribute('aria-label', 'Show how it will read'); eye.setAttribute('aria-pressed', 'false');
+    eye.innerHTML = '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>';
+    function look(on) {
+      var tabs = $all('#w-text .toastui-editor-md-tab-container .tab-item');
+      if (tabs.length > 1) tabs[on ? 1 : 0].click();
+      eye.setAttribute('aria-pressed', on ? 'true' : 'false');
+      $('#w-text').classList.toggle('is-looking', on);
+    }
+    eye.addEventListener('click', function () { look(eye.getAttribute('aria-pressed') !== 'true'); });
     E.editor = new toastui.Editor({
       el: $('#w-text'), height: 'auto', minHeight: '26rem', initialEditType: mode, previewStyle: 'tab', hideModeSwitch: true,
       usageStatistics: false, autofocus: false, placeholder: 'Write the post here.', initialValue: post.body,
-      toolbarItems: [['heading', 'bold', 'italic'], ['quote', 'ul', 'ol'], ['link', 'image']],
+      toolbarItems: [['heading', 'bold', 'italic'], ['quote', 'ul', 'ol'], ['link', 'image'], [{ name: 'look', tooltip: 'Show how it will read', el: eye }]],
       hooks: { addImageBlobHook: function (blob, done) { var n = pictureName(blob); E.pics[n] = { url: URL.createObjectURL(blob), blob: blob, saved: false }; done(E.pics[n].url, ''); changed(); } },
       events: { change: function () { if (E) changed(); } }
     });
-    function showMode() { $all('.w-mode button').forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-mode') === mode ? 'true' : 'false'); }); }
-    $all('.w-mode button').forEach(function (b) { b.addEventListener('click', function () { mode = b.getAttribute('data-mode'); E.editor.changeMode(mode, true); store.set('mode', mode); showMode(); }); });
+    function showMode() { $all('.w-mode button').forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-mode') === mode ? 'true' : 'false'); }); $('#w-text').classList.toggle('is-markdown', mode === 'markdown'); }
+    $all('.w-mode button').forEach(function (b) { b.addEventListener('click', function () { look(false); mode = b.getAttribute('data-mode'); E.editor.changeMode(mode, true); store.set('mode', mode); showMode(); }); });
     showMode();
 
     /* the title grows with its text */
