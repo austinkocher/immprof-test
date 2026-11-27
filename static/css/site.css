@@ -489,3 +489,7 @@ h1,h2,h3,p{margin:0}
   .g-secs{grid-template-columns:minmax(0,1fr)}
   .row.has-img{--thumb-w:5.5rem}
 }
+/* The main picture under a post's text is shown at its own shape, with no frame around it (Austin, November 27, 2026:
+   "drop the frame on the photos"). The homepage keeps its frames, which keep the rows lined up. */
+.post .post-img-end{aspect-ratio:auto;background:none;border:0;overflow:visible}
+.post .post-img-end img{width:auto;max-width:100%;height:auto;max-height:36rem;margin:0 auto;display:block;object-fit:fill}
