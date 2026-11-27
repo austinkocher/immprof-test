@@ -268,7 +268,7 @@
       (E.pr ? '<div class="w-field"><button class="w-link w-danger" type="button" id="w-discard">Delete this draft</button></div>' : '') +
       '</div></details>' +
       '</article>' +
-      '<div class="w-viewwrap" hidden><p class="w-viewnote">This is how the post will read. You can publish without waiting for anything: each link card fills in by itself with the article\u2019s headline and picture when the post goes out.</p><article class="post w-view"></article></div>';
+      '<div class="w-viewwrap" hidden><p class="w-viewnote">This is how the post will read. Each link card fills in by itself with the article\u2019s headline and picture when the post goes out, so you can publish without waiting. To see the cards filled in before it goes out, save the draft: a full preview is ready about three minutes after each save.</p><article class="post w-view"></article></div>';
 
     /* the text */
     var mode = store.get('mode') === 'markdown' ? 'markdown' : 'wysiwyg';
