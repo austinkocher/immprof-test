@@ -268,7 +268,7 @@
       (E.pr ? '<div class="w-field"><button class="w-link w-danger" type="button" id="w-discard">Delete this draft</button></div>' : '') +
       '</div></details>' +
       '</article>' +
-      '<div class="w-viewwrap" hidden><p class="w-viewnote">This is how the post will read. A link card from an outlet that lets its articles be read shows the article\u2019s own title and picture after you save, in the built preview.</p><article class="post w-view"></article></div>';
+      '<div class="w-viewwrap" hidden><p class="w-viewnote">This is how the post will read. You can publish without waiting for anything: each link card fills in by itself with the article\u2019s headline and picture when the post goes out.</p><article class="post w-view"></article></div>';
 
     /* the text */
     var mode = store.get('mode') === 'markdown' ? 'markdown' : 'wysiwyg';
@@ -361,7 +361,7 @@
         lines.slice(1).forEach(function (l) { var m = /^\s*(title|description)\s*:\s*(.*?)\s*$/.exec(l); if (m) old[m[1]] = m[2]; else if (l.trim()) keepLines.push(l); });
       }
       openPop('Link card', [
-        { id: 'url', label: 'Address of the article', type: 'url', placeholder: 'https://', value: old.url, hint: 'The card shows the article’s own title, description and picture. It appears in the preview after you save.' },
+        { id: 'url', label: 'Address of the article', type: 'url', placeholder: 'https://', value: old.url, hint: 'The card shows the article’s own title, description and picture. The card fills in by itself when the post is published. You do not need to preview it first.' },
         { id: 'title', label: 'Headline', placeholder: 'Optional', value: old.title, hint: 'Only if you want different words from the article’s own.' },
         { id: 'description', label: 'Description', placeholder: 'Optional', value: old.description }
       ], function (v, fail) {
@@ -379,7 +379,7 @@
     function videoForm(at) {
       var old = '';
       if (at !== null) { var b = blocks(E.editor.getMarkdown(), 'video')[at]; if (!b) return; old = b.text.trim(); }
-      openPop('Video', [{ id: 'url', label: 'Address of the video', type: 'url', placeholder: 'https://www.youtube.com/watch?v=', value: old, hint: 'YouTube or Vimeo. The player appears in the preview after you save.' }], function (v, fail) {
+      openPop('Video', [{ id: 'url', label: 'Address of the video', type: 'url', placeholder: 'https://www.youtube.com/watch?v=', value: old, hint: 'YouTube or Vimeo. The player appears by itself when the post is published.' }], function (v, fail) {
         if (!/(youtube\.com\/(watch\?|embed\/|shorts\/|live\/)|youtu\.be\/|vimeo\.com\/(video\/)?\d+)/i.test(v.url) || !isAddress(v.url)) { fail('Paste the address of a YouTube or Vimeo video.'); return false; }
         var text = '$$video\n' + v.url + '\n$$';
         if (at === null) insertBlock(text); else swapBlock('video', at, text);
@@ -485,7 +485,7 @@
       var o = outletOf(url), host = ''; try { host = new URL(url).hostname.replace(/^www\./, ''); } catch (e) {}
       var dom = ''; Object.keys(D.outlets || {}).forEach(function (d) { if (host === d || host.slice(-d.length - 1) === '.' + d) dom = d; });
       var site = (o && o.name) || host, refuses = !!(o && o.refuses), logo = refuses && (D.logos || {})[dom];
-      var title = set.title || (refuses ? 'Read the article at ' + site : 'The article’s own headline and picture appear here after you save.');
+      var title = set.title || (refuses ? 'Read the article at ' + site : 'The article’s own headline and picture fill in here when the post is published.');
       var desc = set.description || (refuses ? '' : url);
       return '<a class="linkcard' + (logo ? ' has-pic' : '') + '" href="' + esc(url) + '" target="_blank" rel="noopener"><span class="linkcard-t"><span class="linkcard-site">' + esc(site) + '</span><span class="linkcard-title">' + esc(title) + '</span>' +
         (desc ? '<span class="linkcard-desc">' + esc(desc) + '</span>' : '') + '</span>' + (logo ? '<span class="linkcard-pic linkcard-logo"><img src="' + esc(logo) + '" alt=""></span>' : '') + '</a>';
@@ -637,10 +637,10 @@
   function watchPreview(fresh) {
     if (!E || !E.pr) return;
     clearInterval(E.poll);
-    if (PRACTICE) { status('Saved. On the site, a link to the preview appears here about three minutes after each save.'); return; }
+    if (PRACTICE) { status('Saved. You can publish whenever you are ready. On the site, a full preview is offered here about three minutes after each save, for a last look if you want one.'); return; }
     var want = E.headSha, started = Date.now();
-    function ready() { clearInterval(E.poll); status('The preview is ready. <a class="w-btn" href="' + esc(previewURL()) + '" target="_blank" rel="noopener">Open the preview</a>'); }
-    function waiting() { status((fresh ? 'Saved. ' : '') + 'The preview is being built, which takes about three minutes. A link appears here when it is ready.'); }
+    function ready() { clearInterval(E.poll); status('A full preview is ready if you want a last look. You do not need it to publish. <a class="w-btn" href="' + esc(previewURL()) + '" target="_blank" rel="noopener">Open the preview</a>'); }
+    function waiting() { status((fresh ? 'Saved. ' : '') + 'You can publish whenever you are ready. Link cards, pictures and videos come out the same either way. A full preview will be offered here in about three minutes, for a last look if you want one.'); }
     function check() {
       if (!E) return;
       fetch(SITE + 'preview/pr-' + E.pr + '/version.txt?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.ok ? r.text() : ''; }).then(function (t) {
