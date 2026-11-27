@@ -225,7 +225,7 @@
     });
   }
   function realAddresses(body, pics) {
-    Object.keys(pics).forEach(function (n) { body = body.split('](' + pics[n].url + ')').join('](/media/' + n + ')'); });
+    Object.keys(pics).forEach(function (n) { body = body.split('](' + pics[n].url + ')').join('](/media/' + n + ')').split('\n' + pics[n].url + '\n').join('\n/media/' + n + '\n'); });
     return body;
   }
   function pictureName(file) {
@@ -331,13 +331,14 @@
     function blockView(label, kind) {
       return function (node) {
         var lines = String(node.literal || '').trim().split('\n');
+        if (kind === 'pdf') { var held = Object.keys(E.pics).filter(function (n) { return E.pics[n].url === lines[0].trim(); })[0]; lines[0] = held || lines[0].replace(/^\/media\//, ''); }
         return [{ type: 'openTag', tagName: 'div', outerNewLine: true, attributes: { class: 'w-block', 'data-kind': kind, title: 'Click to change' } },
           { type: 'html', content: '<span class="w-block-l">' + esc(label) + '</span><span class="w-block-a">' + esc(lines[0] || '') + '</span>' + lines.slice(1).map(function (l) { var m = /^\s*(title|description)\s*:\s*(.*)$/.exec(l); return '<span class="' + (m && m[1] === 'title' ? 'w-block-h' : 'w-block-n') + '">' + esc(m ? m[2] : l) + '</span>'; }).join('') },
           { type: 'closeTag', tagName: 'div', outerNewLine: true }];
       };
     }
     /* Card and video blocks in the text, in order: { kind, text, start, end } */
-    var BLOCK = /^\$\$(card|video)\n([\s\S]*?)\n\$\$[ \t]*$/gm;
+    var BLOCK = /^\$\$(card|video|pdf)\n([\s\S]*?)\n\$\$[ \t]*$/gm;
     function blocks(md, kind) { var out = [], m; BLOCK.lastIndex = 0; while ((m = BLOCK.exec(md))) if (m[1] === kind) out.push({ text: m[2], start: m.index, end: m.index + m[0].length }); return out; }
     function swapBlock(kind, n, text) {   /* text null removes the block */
       var md = E.editor.getMarkdown(), b = blocks(md, kind)[n];
@@ -376,6 +377,31 @@
       function note() { var o = outletOf(pop.elements.url.value.trim()); hint.textContent = o && o.refuses ? o.name + ' does not let its pages be read. Paste the headline here; the card will show it with the outlet’s name' + (o.logo ? ' and logo.' : '.') : first; pop.elements.title.placeholder = o && o.refuses ? 'Needed for this outlet' : 'Optional'; }
       pop.elements.url.addEventListener('input', note); note();
     }
+    function pdfForm(at) {   /* at: null for a new file, or the number of the file card being changed */
+      var old = { src: '', title: '' };
+      if (at !== null) { var b = blocks(E.editor.getMarkdown(), 'pdf')[at]; if (!b) return; var ls = b.text.split('\n'); old.src = (ls[0] || '').trim(); ls.slice(1).forEach(function (l) { var m = /^\s*title\s*:\s*(.*?)\s*$/.exec(l); if (m) old.title = m[1]; }); }
+      openPop('PDF', [
+        { id: 'file', label: at === null ? 'PDF file' : 'Replace the file', type: 'file', accept: 'application/pdf,.pdf', hint: at === null ? 'Up to 25 MB.' : 'Leave empty to keep the file already attached.' },
+        { id: 'title', label: 'Title of the document', placeholder: 'Matter of X, decision of November 2026', value: old.title, hint: 'Shown on the file card, with the word Download. Left empty, the file name is used.' }
+      ], function (v, fail) {
+        if (!v.file && at === null) { fail('Choose a PDF file.'); return false; }
+        if (v.file && !/\.pdf$/i.test(v.file.name)) { fail('That file is not a PDF.'); return false; }
+        if (v.file && v.file.size > 25 * 1024 * 1024) { fail('That file is larger than 25 MB, which is too large to attach here.'); return false; }
+        var src = v.file ? keep(v.file) : old.src, title = v.title || (v.file ? v.file.name.replace(/\.pdf$/i, '') : '');
+        var text = '$$pdf\n' + src + (title ? '\ntitle: ' + title : '') + '\n$$';
+        if (at === null) insertBlock(text); else swapBlock('pdf', at, text);
+        return true;
+      }, at === null ? null : { ok: 'Save', remove: function () { swapBlock('pdf', at, null); } });
+    }
+    function pdfHTML(text) {
+      var ls = text.trim().split('\n'), src = (ls[0] || '').trim(), title = '';
+      ls.slice(1).forEach(function (l) { var m = /^\s*title\s*:\s*(.*?)\s*$/.exec(l); if (m) title = m[1]; });
+      var n = Object.keys(E.pics).filter(function (k) { return E.pics[k].url === src; })[0], size = n && E.pics[n].blob ? E.pics[n].blob.size : 0;
+      var meta = 'PDF' + (size ? ', ' + (size >= 1048576 ? (size / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(size / 1024)) + ' KB') : '');
+      if (!title) title = (n || src).replace(/^.*\//, '').replace(/\.pdf$/i, '');
+      return '<a class="filecard" href="' + esc(src) + '" target="_blank" rel="noopener"><span class="filecard-mark" aria-hidden="true"><svg viewBox="0 0 40 48" width="40" height="48"><path d="M3 1.5h22L37 13.5v33H3z" fill="#fff" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M25 1.5v12h12" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="20" y="35" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-weight="700" font-size="11" fill="currentColor">PDF</text></svg></span>' +
+        '<span class="filecard-t"><span class="filecard-title">' + esc(title) + '</span><span class="filecard-meta">' + esc(meta) + '</span></span><span class="filecard-go"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg>Download</span></a>';
+    }
     function videoForm(at) {
       var old = '';
       if (at !== null) { var b = blocks(E.editor.getMarkdown(), 'video')[at]; if (!b) return; old = b.text.trim(); }
@@ -402,27 +428,14 @@
           return true;
         });
       }),
-      file: tool('PDF', '<path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5"/><path d="M10 13h6M10 16.5h6"/>', function () {
-        openPop('PDF', [
-          { id: 'file', label: 'PDF file', type: 'file', accept: 'application/pdf,.pdf' },
-          { id: 'text', label: 'Words of the link', placeholder: 'the decision (PDF)', hint: 'Left empty, the file name is used.' }
-        ], function (v, fail) {
-          if (!v.file) { fail('Choose a PDF file.'); return false; }
-          if (!/\.pdf$/i.test(v.file.name)) { fail('That file is not a PDF.'); return false; }
-          if (v.file.size > 25 * 1024 * 1024) { fail('That file is larger than 25 MB, which is too large to attach here.'); return false; }
-          E.editor.focus();
-          E.editor.exec('addLink', { linkUrl: keep(v.file), linkText: v.text || v.file.name.replace(/\.pdf$/i, '') + ' (PDF)' });
-          changed();
-          return true;
-        });
-      }),
+      file: tool('PDF', '<path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5"/><path d="M10 13h6M10 16.5h6"/>', function () { pdfForm(null); }),
       card: tool('Link card', '<rect x="2.5" y="6" width="19" height="12" rx="1.5"/><path d="M5.5 10h5.5M5.5 13.5h4"/><rect x="14" y="9" width="5" height="6" fill="currentColor" stroke="none"/>', function () { cardForm(null); }),
       video: tool('Video', '<rect x="3" y="5.5" width="18" height="13" rx="2"/><path d="M10.5 9.5v5l4.5-2.5z" fill="currentColor"/>', function () { videoForm(null); })
     };
     E.editor = new toastui.Editor({
       el: $('#w-text'), height: 'auto', minHeight: '26rem', initialEditType: mode, previewStyle: 'tab', hideModeSwitch: true,
       usageStatistics: false, autofocus: false, placeholder: 'Write the post here.', initialValue: post.body, extendedAutolinks: true,   /* a bare address is a link, as it is on the built site */
-      customHTMLRenderer: { card: blockView('Link card', 'card'), video: blockView('Video', 'video') },
+      customHTMLRenderer: { card: blockView('Link card', 'card'), video: blockView('Video', 'video'), pdf: blockView('PDF', 'pdf') },
       toolbarItems: [[tools.undo, tools.redo], ['heading', 'bold', 'italic'], ['quote', 'ul', 'ol', 'hr'], ['link', tools.picture, tools.file, tools.card, tools.video], [{ name: 'look', tooltip: 'Show how it will read', el: eye }]],
       hooks: { addImageBlobHook: function (blob, done) { var n = pictureName(blob); E.pics[n] = { url: URL.createObjectURL(blob), blob: blob, saved: false }; done(E.pics[n].url, ''); changed(); } },
       events: { change: function () { if (E) changed(); } }
@@ -434,7 +447,7 @@
       ev.preventDefault(); ev.stopPropagation();
       var kind = box.getAttribute('data-kind'), n = $all('#w-text .toastui-editor-ww-container .w-block[data-kind="' + kind + '"]').indexOf(box);
       if (n < 0) return;
-      if (kind === 'card') cardForm(n); else videoForm(n);
+      if (kind === 'card') cardForm(n); else if (kind === 'pdf') pdfForm(n); else videoForm(n);
     }, true);
     function showMode() { $all('.w-mode button').forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-mode') === mode ? 'true' : 'false'); }); $('#w-text').classList.toggle('is-markdown', mode === 'markdown'); }
     $all('.w-mode button').forEach(function (b) { b.addEventListener('click', function () { look(false); mode = b.getAttribute('data-mode'); E.editor.changeMode(mode, true); store.set('mode', mode); showMode(); }); });
@@ -504,7 +517,7 @@
       names.forEach(function (n, i) { md = md.split('](' + E.pics[n].url + ')').join('](https://stand-in.invalid/' + i + ')'); });
       function hold(html) { held.push(html); return raw('<p>ZZHELD' + (held.length - 1) + 'ZZ</p>')(); }
       var v = toastui.Editor.factory({ el: tmp, viewer: true, usageStatistics: false, initialValue: md, extendedAutolinks: true,
-        customHTMLRenderer: { card: function (n) { return hold(cardHTML(n.literal || '')); }, video: function (n) { return hold(videoHTML(n.literal || '')); } } });
+        customHTMLRenderer: { card: function (n) { return hold(cardHTML(n.literal || '')); }, video: function (n) { return hold(videoHTML(n.literal || '')); }, pdf: function (n) { return hold(pdfHTML(n.literal || '')); } } });
       var body = document.createElement('div'); body.className = 'post-body';
       var html = (tmp.querySelector('.toastui-editor-contents') || tmp).innerHTML;
       v.destroy();
@@ -607,7 +620,7 @@
     var branch = function () { return PREFIX + E.slug; };
     /* pictures first, the post last, so the draft's newest change is the post itself */
     chain = chain.then(function () {
-      var body = realAddresses(p.body, E.pics), todo = Object.keys(E.pics).filter(function (n) { return !E.pics[n].saved && body.indexOf('](/media/' + n + ')') >= 0; });
+      var body = realAddresses(p.body, E.pics), todo = Object.keys(E.pics).filter(function (n) { return !E.pics[n].saved && (body.indexOf('](/media/' + n + ')') >= 0 || body.indexOf('\n/media/' + n + '\n') >= 0); });
       p.body = body;
       return todo.reduce(function (c, n) { return c.then(function () { return fileToB64(E.pics[n].blob).then(function (b) { return gh.put(MEDIA + n, b, branch(), (/\.pdf$/i.test(n) ? 'Add a file to “' : 'Add a picture to “') + p.title + '”'); }).then(function () { E.pics[n].saved = true; }); }); }, Promise.resolve());
     }).then(function () {

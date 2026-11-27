@@ -1,11 +1,12 @@
 {{- /* Blocks the writing page's buttons put into a post. Each is written between two lines of two dollar signs, with its
        kind on the first line: "card" and then the article's address on the next line, or "video" and then the address of a
-       YouTube or Vimeo video. A card becomes a link card (layouts/_partials/block-card.html) and a video becomes a player
+       YouTube or Vimeo video, or "pdf" and then the address of an attached file (layouts/_partials/block-pdf.html). A card becomes a link card (layouts/_partials/block-card.html) and a video becomes a player
        (layouts/_partials/block-video.html). Anything else between such lines is shown as it was typed. */ -}}
 {{- $t := strings.TrimSpace .Inner -}}
 {{- $kind := index (split $t "\n") 0 | strings.TrimSpace -}}
 {{- $rest := strings.TrimPrefix $kind $t -}}
 {{- if eq $kind "card" -}}{{ partial "block-card.html" $rest }}
 {{- else if eq $kind "video" -}}{{ partial "block-video.html" $rest }}
+{{- else if eq $kind "pdf" -}}{{ partial "block-pdf.html" $rest }}
 {{- else -}}<p>{{ .Inner }}</p>
 {{- end -}}

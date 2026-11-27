@@ -1,0 +1,23 @@
+{{- /* An attached PDF, shown as a file card: a document mark, the title, "PDF" with the file's size and page count, and
+       the word Download (Austin, November 26, 2026: "something that more clearly shows that it's a pdf that people can
+       download", "some visual thing that shows it's a file"). Called with the lines of a pdf block: the file's address on
+       the first line ("/media/name.pdf", kept with the pictures in assets/media) and "title: ..." under it. */ -}}
+{{- $lines := split (strings.TrimSpace .) "\n" -}}
+{{- $src := strings.TrimSpace (index $lines 0) -}}
+{{- $title := "" -}}
+{{- range after 1 $lines -}}{{- with findRESubmatch `^\s*title\s*:\s*(.*?)\s*$` . 1 -}}{{- $title = index (index . 0) 1 -}}{{- end -}}{{- end -}}
+{{- $href := $src -}}{{- $meta := "PDF" -}}
+{{- with resources.Get (strings.TrimPrefix "/" $src) -}}
+  {{- $href = .RelPermalink -}}
+  {{- $bytes := len .Content -}}
+  {{- $size := printf "%d KB" (div $bytes 1024) -}}{{- if ge $bytes 1048576 -}}{{- $size = printf "%.1f MB" (div (float $bytes) 1048576.0) -}}{{- end -}}
+  {{- $pages := len (findRE `/Type\s*/Page\b` .Content) -}}
+  {{- $meta = printf "PDF, %s" $size -}}
+  {{- if eq $pages 1 -}}{{- $meta = printf "%s, 1 page" $meta -}}{{- else if gt $pages 1 -}}{{- $meta = printf "%s, %d pages" $meta $pages -}}{{- end -}}
+{{- end -}}
+{{- if not $title -}}{{- $title = path.BaseName $src | humanize -}}{{- end }}
+<a class="filecard" href="{{ $href }}" download>
+  <span class="filecard-mark" aria-hidden="true"><svg viewBox="0 0 40 48" width="40" height="48"><path d="M3 1.5h22L37 13.5v33H3z" fill="#fff" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M25 1.5v12h12" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="20" y="35" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-weight="700" font-size="11" fill="currentColor">PDF</text></svg></span>
+  <span class="filecard-t"><span class="filecard-title">{{ $title }}</span><span class="filecard-meta">{{ $meta }}</span></span>
+  <span class="filecard-go"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg>Download</span>
+</a>
