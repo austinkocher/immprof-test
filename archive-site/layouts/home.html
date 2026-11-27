@@ -1,0 +1,90 @@
+{{ define "main" }}
+{{- /* The way into the archive: what it is, a search of every post (Pagefind, built by build.sh), then the years and the
+       old TypePad categories, each a page of its own. A search can be linked: ?q=asylum&year=2014&category=Books */ -}}
+{{- $posts := partial "posts.html" . -}}
+<header class="list-h home-h">
+  <h1>ImmigrationProf Blog Archive, 2005 to 2025</h1>
+  <p class="list-d">This archive holds {{ lang.FormatNumber 0 (len $posts) }} posts from the ImmigrationProf Blog's years on TypePad, ending in September 2025. Posts since then are on the <a href="{{ site.Params.current }}">current ImmigrationProf Blog</a>.</p>
+</header>
+
+<section class="arc-sec" id="search">
+  <h2 class="arc-h">Search</h2>
+  <form class="arc-f" id="arc-f" role="search" action="{{ site.Home.RelPermalink }}" method="get">
+    <label class="arc-q"><span>Search the archive</span><input type="search" id="arc-q" name="q" placeholder="Search titles and text" autocomplete="off"></label>
+    <label><span>Year</span><select id="arc-year" name="year" data-all="All years"><option value="">All years</option></select></label>
+    <label><span>Category</span><select id="arc-category" name="category" data-all="All categories"><option value="">All categories</option></select></label>
+  </form>
+  <p class="arc-status" id="arc-status" aria-live="polite"></p>
+  <ol class="arc-res" id="arc-res"></ol>
+  <p><button type="button" class="arc-more" id="arc-more" hidden>Show more posts</button></p>
+  <noscript><p class="arc-d">Searching needs JavaScript. Every post is listed under its year and its category below.</p></noscript>
+</section>
+
+<section class="arc-sec" id="years">
+  <h2 class="arc-h"><a href="{{ "year/" | relURL }}">Posts by year</a></h2>
+  {{ partial "years.html" . }}
+</section>
+
+<section class="arc-sec" id="categories">
+  <h2 class="arc-h"><a href="{{ "category/" | relURL }}">Posts by category</a></h2>
+  {{ partial "categories.html" . }}
+</section>
+
+<script type="module">
+const $ = id => document.getElementById(id);
+const F = { year: $('arc-year'), category: $('arc-category') };
+const FIRST = 10, STEP = 20;
+let pf, results = [], shown = 0, run = 0;
+try { pf = await import('{{ "pagefind/pagefind.js" | relURL }}'); await pf.options({ excerptLength: 26 }); await pf.init(); }
+catch (e) { $('arc-status').textContent = 'The search index has not been built yet. Run build.sh.'; }
+if (pf) {
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const all = await pf.filters();
+  const fill = (sel, values) => { sel.innerHTML = ''; sel.add(new Option(sel.dataset.all, '')); values.forEach(v => sel.add(new Option(v, v))); };
+  fill(F.year, Object.keys(all.year || {}).sort().reverse());
+  fill(F.category, Object.keys(all.category || {}).sort());
+  const qs = new URLSearchParams(location.search);
+  $('arc-q').value = qs.get('q') || '';
+  F.year.value = qs.get('year') || ''; F.category.value = qs.get('category') || '';
+
+  async function more(n) {
+    const mine = run, batch = await Promise.all(results.slice(shown, shown + n).map(r => r.data()));
+    if (mine !== run) return;
+    $('arc-res').insertAdjacentHTML('beforeend', batch.map(d => {
+      const f = d.filters || {};
+      return '<li><a class="line-title" href="' + esc(d.url) + '">' + esc(d.meta.title || '') + '</a>' +
+        ($('arc-q').value.trim() ? '<p class="arc-x">' + d.excerpt + '</p>' : '') +
+        '<p class="arc-rm">' + (d.meta.date ? '<span>' + esc(d.meta.date) + '</span>' : '') +
+        (f.category ? '<span>' + esc(f.category.join(', ')) + '</span>' : '') + '</p></li>';
+    }).join(''));
+    shown += batch.length;
+    $('arc-more').hidden = shown >= results.length;
+  }
+  async function search() {
+    const mine = ++run, q = $('arc-q').value.trim();
+    const narrowed = q || F.year.value || F.category.value;
+    const u = new URLSearchParams();
+    if (q) u.set('q', q); if (F.year.value) u.set('year', F.year.value); if (F.category.value) u.set('category', F.category.value);
+    history.replaceState(null, '', location.pathname + (u.toString() ? '?' + u : '') + location.hash);
+    results = []; shown = 0; $('arc-res').innerHTML = ''; $('arc-more').hidden = true;
+    if (!narrowed) { $('arc-status').textContent = ''; return; }
+    const filters = {};
+    if (F.year.value) filters.year = [F.year.value];
+    if (F.category.value) filters.category = [F.category.value];
+    const res = await pf.search(q || null, { filters, sort: q ? undefined : { date: 'desc' } });
+    if (mine !== run) return;
+    results = res.results;
+    const n = results.length.toLocaleString('en-US');
+    $('arc-status').innerHTML = !results.length ? 'Nothing matches. <button type="button" class="arc-clear" data-clear>Clear the search</button>'
+      : n + (results.length === 1 ? ' result' : ' results') + (q ? ', best match first' : ', newest first') + '. <button type="button" class="arc-clear" data-clear>Clear the search</button>';
+    await more(FIRST);
+  }
+  let t; $('arc-q').addEventListener('input', () => { clearTimeout(t); t = setTimeout(search, 220); });
+  Object.values(F).forEach(s => s.addEventListener('change', search));
+  $('arc-f').addEventListener('submit', e => { e.preventDefault(); search(); });
+  $('arc-more').addEventListener('click', () => more(STEP));
+  $('arc-status').addEventListener('click', e => { if ('clear' in e.target.dataset) { $('arc-q').value = ''; Object.values(F).forEach(s => s.value = ''); search(); } });
+  search();
+}
+</script>
+{{ end }}

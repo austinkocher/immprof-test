@@ -1,0 +1,2 @@
+{{- /* Every post, newest first, worked out once per build. */ -}}
+{{- return (where site.RegularPages "Type" "post").ByDate.Reverse -}}

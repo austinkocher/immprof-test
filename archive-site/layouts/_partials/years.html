@@ -1,0 +1,5 @@
+{{- $posts := partial "posts.html" . -}}
+<ul class="terms terms-year">
+  {{ range (site.GetPage "/year").Sections.ByTitle.Reverse }}<li><a href="{{ .RelPermalink }}">{{ .Title }}</a><span class="terms-n">{{ lang.FormatNumber 0 (len (where $posts "Params.year" .Params.year)) }}</span></li>
+  {{ end }}
+</ul>

@@ -1,0 +1,15 @@
+<header class="masthead">
+  <nav class="nav-util" aria-label="Site">
+    <ul>
+      <li><a href="{{ site.Home.RelPermalink }}">Archive home</a></li>
+      <li><a href="{{ "year/" | relURL }}">Years</a></li>
+      <li><a href="{{ "category/" | relURL }}">Categories</a></li>
+      <li><a class="nav-now" href="{{ site.Params.current }}">Current ImmigrationProf Blog</a></li>
+      {{- /* Enter sends the words to the archive's home page, which shows the results. */}}
+      <li class="nav-q"><form action="{{ site.Home.RelPermalink }}" method="get" role="search"><label class="off" for="nav-q">Search the archive</label><input type="search" id="nav-q" name="q" placeholder="Search" autocomplete="off"></form></li>
+    </ul>
+  </nav>
+  <div class="brand">
+    <a class="brand-name" href="{{ site.Home.RelPermalink }}"><img src="{{ "brand/logo.png" | relURL }}" alt="ImmigrationProf Blog" width="1990" height="211"><span class="brand-sub">Archive, 2005 to 2025</span></a>
+  </div>
+</header>

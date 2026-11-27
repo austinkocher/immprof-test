@@ -1,0 +1,20 @@
+{{ define "main" }}
+{{- $posts := where (partial "posts.html" .) "Params.category" .Params.category -}}
+{{- $pg := .Paginate $posts -}}
+<header class="list-h">
+  <p class="kicker"><a href="{{ "category/" | relURL }}">Posts by category</a></p>
+  <h1>{{ .Title }}</h1>
+  <p class="list-m">{{ lang.FormatNumber 0 (len $posts) }} {{ if eq (len $posts) 1 }}post{{ else }}posts{{ end }}, newest first{{ if gt $pg.TotalPages 1 }}. Page {{ $pg.PageNumber }} of {{ $pg.TotalPages }}{{ end }}</p>
+</header>
+<ol class="lines">
+  {{ range $pg.Pages }}<li><a class="line-title" href="{{ .RelPermalink }}">{{ .Title }}</a><span class="line-m">{{ partial "day.html" . }}</span></li>
+  {{ end }}
+</ol>
+{{ if gt $pg.TotalPages 1 }}
+<nav class="pager" aria-label="Pages">
+  {{ if $pg.HasPrev }}<a href="{{ $pg.Prev.URL }}">Newer posts</a>{{ end }}
+  <span>Page {{ $pg.PageNumber }} of {{ $pg.TotalPages }}</span>
+  {{ if $pg.HasNext }}<a href="{{ $pg.Next.URL }}">Older posts</a>{{ end }}
+</nav>
+{{ end }}
+{{ end }}

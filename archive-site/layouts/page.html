@@ -1,0 +1,18 @@
+{{ define "main" }}
+{{- /* Search (Pagefind) reads only what is inside data-pagefind-body: the title and text of a post. */ -}}
+{{- $cat := site.GetPage (printf "/category/%s" .Params.category_slug) -}}
+<article class="post" data-pagefind-body>
+  <span hidden data-pagefind-filter="year:{{ .Date.Format "2006" }}"></span>
+  <span hidden data-pagefind-meta="date:{{ partial "day.html" . }}" data-pagefind-sort="date:{{ .Date.Format "2006-01-02" }}"></span>
+  <header class="post-h">
+    {{ with $cat }}<a class="kicker" href="{{ .RelPermalink }}" data-pagefind-filter="category">{{ .Title }}</a>{{ end }}
+    <h1>{{ .Title }}</h1>
+    <p class="byline" data-pagefind-ignore><span class="byline-a">{{ .Params.byline }}</span> <time datetime="{{ .Date.Format "2006-01-02" }}">{{ partial "day.html" . }}</time></p>
+  </header>
+  <p class="arch-note" data-pagefind-ignore>This is an archived post from the ImmigrationProf Blog on TypePad. Some pictures and links from that time no longer work.</p>
+  <div class="post-body">
+{{ partial "rooted.html" .Content | safeHTML }}
+  </div>
+  <p class="post-more" data-pagefind-ignore>{{ with site.GetPage (printf "/year/%s" (.Date.Format "2006")) }}<a href="{{ .RelPermalink }}#m{{ $.Date.Format "01" }}">More from {{ $.Date.Format "January 2006" }}</a>{{ end }}{{ with $cat }}<a href="{{ .RelPermalink }}">More in {{ .Title }}</a>{{ end }}<a href="{{ site.Params.current }}">Current ImmigrationProf Blog</a></p>
+</article>
+{{ end }}

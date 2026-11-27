@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+<head>
+{{ partial "head.html" . }}
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="shell">
+{{ partial "masthead.html" . }}
+<div class="frame">
+<main id="main" class="main">
+{{ block "main" . }}{{ end }}
+</main>
+</div>
+{{ partial "footer.html" . }}
+</div>
+</body>
+</html>

@@ -1,0 +1,31 @@
+# ImmigrationProf Blog Archive, 2005 to 2025: the posts from the blog's years on TypePad, as a site of their own.
+#   Build it:  HUGO_PARAMS_TEST=1 HUGO_BASEURL=https://austinkocher.github.io/immprof-test/historical/ bash build.sh
+baseURL = "https://austinkocher.github.io/immprof-test/historical/"
+title = "ImmigrationProf Blog Archive, 2005 to 2025"
+locale = "en-US"
+timeZone = "America/New_York"
+enableRobotsTXT = true
+disableHugoGeneratorInject = true
+disableKinds = ["taxonomy", "term", "rss", "sitemap"]
+summaryLength = 30
+
+[pagination]
+  pagerSize = 100
+
+[outputs]
+  home = ["html"]
+  section = ["html"]
+  page = ["html"]
+
+[params]
+  description = "Posts from the ImmigrationProf Blog's years on TypePad, 2005 to September 2025."
+  current = "https://immprof.com/"   # the blog today
+  # test: set from the build line (HUGO_PARAMS_TEST=1). While it is on, every page asks search engines not to list it.
+
+# Posts are kept as the HTML TypePad stored, so the text is unchanged.
+[markup.goldmark.renderer]
+  unsafe = true
+
+# Content files in HTML are allowed: every post is one.
+[security]
+  allowContent = ['! ^text/org$']

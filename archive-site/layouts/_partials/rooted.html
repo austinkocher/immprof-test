@@ -1,0 +1,5 @@
+{{- /* Links from one archived post to another are stored as href="/post/<name>/" (tools/import_archive.py). When the site is
+       published inside a folder of an address, as the test copy is, the folder is put in front. At a plain address nothing changes. */ -}}
+{{- $b := site.Home.RelPermalink -}}
+{{- if eq $b "/" }}{{ return . }}{{ end -}}
+{{- return (replace (string .) `href="/post/` (printf `href="%spost/` $b)) -}}

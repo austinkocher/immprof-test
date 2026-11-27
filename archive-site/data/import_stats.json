@@ -1,0 +1,76 @@
+{
+ "records": 19863,
+ "written": 19863,
+ "left_out": 0,
+ "damaged_author": 896,
+ "date_from_address": 915,
+ "damaged_date": 915,
+ "links_rewritten": 14385,
+ "links_to_posts_not_in_archive": 1735,
+ "dead_images_removed": 51321,
+ "dead_image_links_removed": 51097,
+ "posts_with_dead_images": 11539,
+ "images_kept": 1843,
+ "breaks_restored": 222385,
+ "dead_images_by_host": {
+  "i.zemanta.com": 40214,
+  "lawprofessors.typepad.com": 11107
+ },
+ "date_differs_from_address": 3,
+ "printed_emails_removed": 31,
+ "posts_with_printed_emails_removed": 23,
+ "years": {
+  "2005": 4,
+  "2006": 2,
+  "2008": 3,
+  "2009": 123,
+  "2010": 1149,
+  "2011": 1229,
+  "2012": 868,
+  "2013": 920,
+  "2014": 1340,
+  "2015": 1379,
+  "2016": 1463,
+  "2017": 1657,
+  "2018": 1185,
+  "2019": 1341,
+  "2020": 1517,
+  "2021": 1365,
+  "2022": 1263,
+  "2023": 1034,
+  "2024": 1056,
+  "2025": 965
+ },
+ "categories": {
+  "Books": 264,
+  "Conferences and Call for Papers": 251,
+  "Current Affairs": 16396,
+  "Data and Research": 208,
+  "Film & Television": 817,
+  "Food and Drinks": 36,
+  "Immigration Law Clinics": 144,
+  "Jobs and Fellowships": 69,
+  "Law Review Articles & Essays": 741,
+  "Music": 268,
+  "Photos": 73,
+  "Religion": 10,
+  "Sports": 253,
+  "Teaching Resources": 333
+ },
+ "leak_check": {
+  "pieces checked": {
+   "name": 538,
+   "author field": 1390,
+   "web address": 352,
+   "IP number": 610,
+   "email": 497
+  },
+  "posts holding a piece": {
+   "email": 0,
+   "IP number": 0,
+   "author field": 0,
+   "web address": 559
+  },
+  "posts holding the start of the reader's comment from their date field": 1
+ }
+}

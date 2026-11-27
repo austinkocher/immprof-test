@@ -52,6 +52,13 @@ jobs:
           restore-keys: hugo-resources-
       - name: Build the site
         run: HUGO_BASEURL="$SITE/" bash build.sh
+      - name: Build the historical archive
+        # The standalone archive of the 2005 to 2025 posts (archive-site/), published under /historical/.
+        run: |
+          (cd archive-site && HUGO_PARAMS_TEST=1 HUGO_BASEURL="$SITE/historical/" bash build.sh)
+          mkdir -p public/historical
+          cp -a archive-site/public/. public/historical/
+          echo "historical archive: $(find public/historical -type f | wc -l) files"
       - name: Build a preview for each open draft
         id: drafts
         run: |

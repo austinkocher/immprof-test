@@ -1,0 +1,5 @@
+{{- $posts := partial "posts.html" . -}}
+<ul class="terms terms-cat">
+  {{ range (site.GetPage "/category").Sections.ByTitle }}<li><a href="{{ .RelPermalink }}">{{ .Title }}</a><span class="terms-n">{{ lang.FormatNumber 0 (len (where $posts "Params.category" .Params.category)) }}</span></li>
+  {{ end }}
+</ul>

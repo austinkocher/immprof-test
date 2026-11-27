@@ -1,0 +1,2 @@
+User-agent: *
+{{ $t := string (site.Params.test | default "") }}{{ if and $t (ne $t "0") (ne $t "false") }}Disallow: /{{ else }}Allow: /{{ end }}

@@ -1,0 +1,2 @@
+{{- /* A post's date. A record whose date was lost in the export shows the month and year from its old address. */ -}}
+{{- if .Params.date_from_address }}{{ .Date.Format "January 2006" }}{{ else }}{{ .Date.Format "January 2, 2006" }}{{ end -}}

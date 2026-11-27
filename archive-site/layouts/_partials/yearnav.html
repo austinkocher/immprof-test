@@ -1,0 +1,3 @@
+<nav class="pager pager-years" aria-label="Years">
+  {{ range (site.GetPage "/year").Sections.ByTitle.Reverse }}<a href="{{ .RelPermalink }}"{{ if eq . $ }} aria-current="page"{{ end }}>{{ .Title }}</a>{{ end }}
+</nav>

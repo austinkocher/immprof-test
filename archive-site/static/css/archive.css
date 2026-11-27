@@ -1,0 +1,151 @@
+/* ImmigrationProf Blog Archive, 2005 to 2025. One stylesheet, taken from the current site's design (its static/css/site.css):
+   serif headlines and text (Noto Serif), sans labels (Inter), one dark red for links and labels on warm off-white.
+   The only lines are neutral one-pixel hairlines. */
+
+@font-face{font-family:"Inter";src:url("../fonts/inter-latin-wght-normal.woff2") format("woff2");font-weight:100 900;font-style:normal;font-display:swap}
+@font-face{font-family:"Noto Serif";src:url("../fonts/noto-serif-normal-300-800.woff2") format("woff2");font-weight:300 800;font-style:normal;font-display:swap}
+@font-face{font-family:"Noto Serif";src:url("../fonts/noto-serif-italic-300-800.woff2") format("woff2");font-weight:300 800;font-style:italic;font-display:swap}
+
+:root{--ink:#241f1a;--accent:#8c1d18;--link:#7a1a15;--meta:#62574a;--on-accent:#fff;--bg:#fafaf8;--tint:#f1efe9;--rule:#dcd8cf;--frame:#ffffff;--hl:"Noto Serif",Georgia,serif;--body:"Noto Serif",Georgia,serif;--ui:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+
+/* Page frame */
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);line-height:1.5;font-size:16px}
+a{color:var(--link);text-decoration-thickness:1px;text-underline-offset:.15em}
+a:hover{color:var(--accent)}
+img{max-width:100%;height:auto}
+ul,ol{margin:0;padding:0}
+h1,h2,h3,p{margin:0}
+.skip{position:absolute;left:-999px}
+.skip:focus{left:8px;top:8px;background:var(--bg);padding:.5rem;z-index:10}
+.off{position:absolute;left:-999px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.shell{margin:0 auto;padding:0 1.5rem;max-width:80rem}
+.main{padding:2.25rem 0 3rem}
+
+/* Header: the top links and search, then the logo with the archive's name under it, all centered. */
+.masthead{padding:.55rem 0 1.3rem;text-align:center;background:#f7f1e5;box-shadow:0 0 0 100vmax #f7f1e5;clip-path:inset(0 -100vmax)}
+.masthead ul,.footer-nav,.terms,.lines,.months,.arc-res{list-style:none}
+.nav-util{font-family:var(--ui);padding:.2rem 0}
+.nav-util ul{display:flex;flex-wrap:wrap;gap:.2rem 1.1rem;justify-content:center;align-items:baseline}
+.nav-util a{font-size:.78rem;color:var(--meta);text-decoration:none}
+.nav-util a:hover{color:var(--accent);text-decoration:underline}
+.nav-util a.nav-now{font-weight:700;color:var(--accent)}
+.nav-q input{font:.78rem/1.2 var(--ui);color:var(--ink);border:1px solid transparent;border-bottom-color:var(--rule);border-radius:0;padding:.2rem .2rem .25rem 1.3rem;width:9rem;-webkit-appearance:none;appearance:none;background:transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2362574a' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E") no-repeat .1rem 46%/.82rem}
+.nav-q input::placeholder{color:var(--meta);opacity:1}
+.nav-q input:focus{outline:0;border-bottom-color:var(--ink)}
+.brand{margin-top:1.1rem}
+.brand .brand-name{display:block;width:fit-content;margin:0 auto;font-size:min(4.2rem,8.2vw);line-height:1;text-decoration:none;color:var(--ink)}
+.brand-name img{display:block;width:10.365em;height:auto;margin:0 auto}
+.brand-sub{display:block;margin-top:.9rem;font:600 1.15rem/1.2 var(--ui);color:var(--ink)}
+@media (max-width:560px){.nav-q input{width:6rem}.brand-sub{font-size:1rem}}
+
+/* Footer */
+.footer{padding:1.25rem 0 3rem;font:.8rem/1.6 var(--ui);color:var(--meta);border-top:1px solid var(--rule)}
+.footer-nav{display:flex;flex-wrap:wrap;gap:.3rem 1.25rem}
+.footer-credit{text-align:center;margin-top:2rem;padding-top:1.5rem;border-top:1px solid var(--rule)}
+.footer-logo{display:inline-block;margin:0 0 .6rem}
+.footer-logo img{display:block;height:1.9rem;width:auto;margin:0 auto}
+.footer .footer-collab{margin:0;text-align:center;color:var(--ink)}
+
+/* Labels and list pages */
+.kicker{font:700 .82rem var(--ui);text-decoration:none;color:var(--accent)}
+.kicker a{color:inherit;text-decoration:none}
+.kicker a:hover,a.kicker:hover{text-decoration:underline}
+.list-h,.lines,.pager,.terms,.month,.arc-sec{max-width:54rem;margin-left:auto;margin-right:auto}
+.list-h{margin-bottom:1.5rem;border-bottom:1px solid var(--rule);padding-bottom:1rem}
+.list-h h1{font:700 2.6rem/1.12 var(--hl);letter-spacing:-.015em;margin:.3rem 0 .6rem;text-wrap:balance;overflow-wrap:anywhere}
+.list-d{font:1.05rem/1.5 var(--body);color:var(--meta);max-width:48rem}
+.list-m{font:.78rem var(--ui);color:var(--meta);margin-top:.4rem}
+.home-h{border-bottom:0;margin-bottom:1rem;padding-bottom:0}
+
+/* Lists of years, categories and months, each with its count */
+.terms{columns:2;column-gap:2.5rem}
+.terms li{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;padding:.4rem 0;border-bottom:1px solid var(--rule);font-size:1.05rem;break-inside:avoid}
+.terms a{text-decoration:none;font-weight:600;color:var(--ink)}
+.terms a:hover{color:var(--accent);text-decoration:underline}
+.terms-year{columns:3}
+.terms-n{font:.78rem var(--ui);font-variant-numeric:tabular-nums;color:var(--meta)}
+.months{display:flex;flex-wrap:wrap;gap:.3rem 1.4rem;margin-top:.9rem;font:.9rem var(--ui)}
+.months .terms-n{margin-left:.25rem}
+.month{margin-top:2.2rem;scroll-margin-top:1rem}
+.month h2{font:700 1.45rem/1.2 var(--hl);padding-bottom:.5rem;border-bottom:1px solid var(--rule)}
+.month h2 .terms-n{margin-left:.6rem;font-weight:400}
+
+/* A post in a list: its title, then the date */
+.lines li{padding:.7rem 0;border-bottom:1px solid var(--rule)}
+.line-title{font:600 1.06rem/1.35 var(--hl);text-decoration:none;color:var(--ink);overflow-wrap:anywhere}
+.line-title:hover{text-decoration:underline;color:var(--accent)}
+.line-m{display:block;font:.78rem/1.4 var(--ui);color:var(--meta);margin-top:.2rem}
+.pager{display:flex;flex-wrap:wrap;gap:.4rem 1.5rem;align-items:baseline;padding:1.5rem 0 0;font:.9rem var(--ui)}
+.pager span{color:var(--meta)}
+.pager-years{margin-top:1.5rem}
+.pager-years a[aria-current]{font-weight:700;color:var(--ink);text-decoration:none}
+
+/* Home page: search, years, categories */
+.arc-sec{margin-bottom:3rem}
+.arc-h{font:700 1.7rem/1.2 var(--hl);margin-bottom:.7rem}
+.arc-h a{color:var(--ink);text-decoration:none}
+.arc-h a:hover{color:var(--accent)}
+.arc-d{font:1.02rem/1.5 var(--body);color:var(--meta);max-width:42rem;margin-bottom:1.1rem}
+.arc-f{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.8rem 1rem;margin-bottom:1rem}
+.arc-f label{display:block;min-width:0}
+.arc-f label span{display:block;font:700 .78rem var(--ui);margin-bottom:.25rem}
+.arc-f .arc-q{grid-column:1/-1}
+.arc-f input,.arc-f select{width:100%;font:1rem var(--ui);color:var(--ink);background:var(--bg);border:1px solid var(--rule);border-radius:0;padding:.6rem .7rem}
+.arc-f input{font-size:1.05rem;padding:.75rem .8rem}
+.arc-status{font:.9rem var(--ui);color:var(--meta);margin-bottom:.3rem}
+.arc-clear{font:inherit;font-weight:700;color:var(--accent);background:none;border:0;padding:0;margin-left:.3rem;cursor:pointer;text-decoration:underline}
+.arc-res li{padding:.8rem 0;border-top:1px solid var(--rule)}
+.arc-res li:last-child{border-bottom:1px solid var(--rule)}
+.arc-x{font:.95rem/1.45 var(--body);color:var(--ink);margin-top:.25rem;overflow-wrap:anywhere}
+.arc-x mark{background:none;color:inherit;font-weight:700}
+.arc-rm{display:flex;flex-wrap:wrap;gap:.1rem 1.1rem;font:.8rem var(--ui);color:var(--meta);margin-top:.3rem}
+.arc-more{font:700 .92rem var(--ui);color:var(--ink);background:none;border:1px solid var(--rule);padding:.6rem 1.1rem;margin-top:1rem;cursor:pointer}
+.arc-more:hover{color:var(--accent)}
+
+/* Post page: a centered header over one column of text */
+.post-h{text-align:center;max-width:48rem;margin:1rem auto 1.5rem}
+.post-h h1{font:700 2.9rem/1.12 var(--hl);letter-spacing:-.015em;margin:.6rem 0 1rem;text-wrap:balance;overflow-wrap:anywhere}
+.byline{font:.82rem var(--ui);color:var(--meta);display:flex;gap:1rem;flex-wrap:wrap;justify-content:center}
+.byline-a{font-weight:700;color:var(--ink)}
+.arch-note,.post-body,.post-more{max-width:46rem;margin-left:auto;margin-right:auto}
+.arch-note{background:var(--tint);padding:.7rem 1rem;margin-bottom:2rem;font:.86rem/1.5 var(--ui);color:var(--ink)}
+.post-more{display:flex;flex-wrap:wrap;gap:.4rem 1.5rem;margin-top:2.5rem;padding-top:1rem;border-top:1px solid var(--rule);font:.88rem var(--ui)}
+
+/* Post text: the HTML TypePad stored, with its own inline styles */
+.post-body{font:1.14rem/1.7 var(--body);overflow-wrap:break-word}
+.post-body p,.post-body ul,.post-body ol,.post-body blockquote,.post-body figure{margin:0 0 1em}
+.post-body p:empty{display:none}
+.post-body ul,.post-body ol{padding-left:1.4em}
+.post-body h1,.post-body h2,.post-body h3,.post-body h4{font:inherit;font-weight:700;margin:1.2em 0 .5em}
+.post-body blockquote{margin-left:0;padding:0 0 0 1.5rem;font-size:.94em;line-height:1.6}
+.post-body figure{margin-left:0;margin-right:0}
+.post-body hr{border:0;border-top:1px solid var(--rule);margin:2em auto;width:100%}
+.post-body img{max-width:100%;width:auto;height:auto;max-height:36rem}
+.post-body iframe,.post-body embed,.post-body object,.post-body video{max-width:100%}
+.post-body iframe{border:0}
+.post-body table{display:block;overflow-x:auto;max-width:100%;height:auto}
+.post-body table[style*="width"],.post-body td[style*="width"],.post-body th[style*="width"],.post-body div[style*="width"],.post-body p[style*="width"],.post-body table[width],.post-body td[width]{width:auto!important;max-width:100%!important}
+.post-body td,.post-body th{overflow-wrap:anywhere}
+.post-body pre{white-space:pre-wrap;overflow-wrap:anywhere}
+
+@media (max-width:900px){
+  .post-h h1,.list-h h1{font-size:2rem}
+  .terms-year{columns:2}
+}
+@media (max-width:560px){
+  .post-h h1,.list-h h1{font-size:1.65rem}
+  .terms,.terms-year{columns:1}
+  .arc-f{grid-template-columns:minmax(0,1fr)}
+}
+
+/* "Related articles" boxes that a recommendation service added under many posts from 2010 to 2018. Their thumbnails are gone,
+   so the box is shown as a plain list of links with no frame. */
+.post-body fieldset{border:0;padding:0;margin:1.5em 0 1em;min-width:0}
+.post-body legend{padding:0;font:700 .9rem var(--ui);margin-bottom:.4rem}
+.post-body .zemanta-article-ul{overflow:visible!important}
+.post-body .zemanta-article-ul-li{float:none!important;width:auto!important;margin:0 0 .35rem!important;font:.9rem/1.4 var(--ui)!important}
+.post-body .zemanta-article-ul-li a{display:inline!important;height:auto!important;padding:0!important;line-height:inherit!important;text-decoration:underline!important}
+.post-body .zemanta-pixie{display:none}

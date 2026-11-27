@@ -1,0 +1,14 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ if .IsHome }}{{ site.Title }}{{ else }}{{ .Title }}, {{ site.Title }}{{ end }}</title>
+<link rel="canonical" href="{{ .Permalink }}">
+{{- /* A test copy asks search engines not to list it. The build line sets HUGO_PARAMS_TEST=1; "0" or "false" turns it off. */ -}}
+{{- $t := string (site.Params.test | default "") -}}
+{{- if and $t (ne $t "0") (ne $t "false") }}
+<meta name="robots" content="noindex, nofollow">{{ end }}
+<meta property="og:site_name" content="{{ site.Title }}">
+<meta property="og:title" content="{{ .Title }}">
+<link rel="icon" type="image/png" sizes="32x32" href="{{ "brand/mark-32.png" | relURL }}">
+<link rel="icon" type="image/png" sizes="192x192" href="{{ "brand/mark-192.png" | relURL }}">
+<link rel="apple-touch-icon" href="{{ "brand/mark-180.png" | relURL }}">
+<link rel="stylesheet" href="{{ "css/archive.css" | relURL }}?v={{ site.Params.cssv | default "1" }}">

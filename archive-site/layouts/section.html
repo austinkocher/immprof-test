@@ -1,0 +1,7 @@
+{{ define "main" }}
+{{- /* The two index pages: /year/ and /category/. */ -}}
+<header class="list-h">
+  <h1>{{ .Title }}</h1>
+</header>
+{{ if eq .Section "year" }}{{ partial "years.html" . }}{{ else }}{{ partial "categories.html" . }}{{ end }}
+{{ end }}

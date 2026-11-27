@@ -1,0 +1,23 @@
+{{ define "main" }}
+{{- /* One year: its months with counts, then every post of the year under its month, newest month first. */ -}}
+{{- $posts := where (partial "posts.html" .) "Params.year" .Params.year -}}
+{{- $months := $posts.GroupByDate "2006-01" -}}
+<header class="list-h">
+  <p class="kicker"><a href="{{ "year/" | relURL }}">Posts by year</a></p>
+  <h1>{{ .Title }}</h1>
+  <p class="list-m">{{ lang.FormatNumber 0 (len $posts) }} {{ if eq (len $posts) 1 }}post{{ else }}posts{{ end }}</p>
+  <ul class="months">
+    {{ range $months }}{{ $d := (index .Pages 0).Date }}<li><a href="#m{{ $d.Format "01" }}">{{ $d.Format "January" }}</a> <span class="terms-n">{{ len .Pages }}</span></li>{{ end }}
+  </ul>
+</header>
+{{ range $months }}{{ $d := (index .Pages 0).Date }}
+<section class="month" id="m{{ $d.Format "01" }}">
+  <h2>{{ $d.Format "January 2006" }} <span class="terms-n">{{ len .Pages }} {{ if eq (len .Pages) 1 }}post{{ else }}posts{{ end }}</span></h2>
+  <ol class="lines">
+    {{ range .Pages }}<li><a class="line-title" href="{{ .RelPermalink }}">{{ .Title }}</a><span class="line-m">{{ partial "day.html" . }}, {{ .Params.category }}</span></li>
+    {{ end }}
+  </ol>
+</section>
+{{ end }}
+{{ partial "yearnav.html" . }}
+{{ end }}
