@@ -151,3 +151,4 @@
   .w-list li{grid-template-columns:1fr}
   .w-list-a{grid-column:1;grid-row:auto}
 }
+.w-newguest{margin-top:.7rem;max-width:30rem;padding:.9rem 1rem;background:var(--tint);font:.84rem var(--ui)}

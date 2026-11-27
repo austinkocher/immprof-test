@@ -237,6 +237,8 @@
   function showEditor(post, st) {
     st = st || {};
     E = { post: post, slug: st.slug || '', pr: st.pr || 0, fileSha: st.fileSha || '', headSha: st.headSha || '', pics: st.pics || {}, lead: null, dirty: false, busy: false };
+    /* A guest named on this draft who is not on the site yet stays in the list when the draft is reopened. */
+    var guests = D.guests.slice(); if (post.contributors[0] && guests.indexOf(post.contributors[0]) < 0) guests.push(post.contributors[0]);
     var opt = function (list, sel, empty) { return (empty ? '<option value="">' + esc(empty) + '</option>' : '') + list.map(function (x) { return '<option' + (x === sel ? ' selected' : '') + '>' + esc(x) + '</option>'; }).join(''); };
     root.innerHTML =
       '<div class="w-bar"><a class="w-back" href="#/">Drafts</a><span class="w-state" aria-live="polite"></span>' +
@@ -259,7 +261,11 @@
       '<span class="w-hint">Optional. Shown beside the title on the homepage and under the text of the post.</span></div>' +
       '<label class="w-check"><input type="checkbox" id="w-share"' + (post.share_picture ? ' checked' : '') + '> Share with the main picture in place of the ImmigrationProf card</label>' +
       '<label class="w-check"><input type="checkbox" id="w-wide"' + (post.wide ? ' checked' : '') + '> Let landscape pictures in the text run the full width of the page</label>' +
-      '<div class="w-field"><label class="w-lab" for="w-guest">Guest author</label><select id="w-guest">' + opt(D.guests, post.contributors[0], 'None') + '</select>' +
+      '<div class="w-field"><label class="w-lab" for="w-guest">Guest author</label><select id="w-guest">' + opt(guests, post.contributors[0], 'None') + '<option value="__new">Add a new guest author\u2026</option></select>' +
+      '<div class="w-newguest" hidden><label class="w-pop-f"><span>Name</span><input id="w-gname" type="text" autocomplete="off"></label>' +
+      '<label class="w-pop-f"><span>Short bio</span><input id="w-gbio" type="text" placeholder="Optional" autocomplete="off"><small>One sentence, shown under the post as \u201cAbout the author\u201d.</small></label>' +
+      '<label class="w-pop-f"><span>Link</span><input id="w-glink" type="url" placeholder="Optional, https://" autocomplete="off"><small>The guest\u2019s own page or profile.</small></label>' +
+      '<label class="w-pop-f"><span>Words of the link</span><input id="w-glabel" type="text" placeholder="Optional. Left empty, the guest\u2019s name is used." autocomplete="off"></label></div>' +
       '<span class="w-hint">Only for a guest post. The guest is shown as the author and you as the editor who posted it.</span></div>' +
       '<div class="w-field"><span class="w-lab">Date</span><label class="w-check"><input type="radio" name="w-when" value="auto"' + (post.dateAuto ? ' checked' : '') + '> The moment it is published</label>' +
       '<label class="w-check"><input type="radio" name="w-when" value="set"' + (post.dateAuto ? '' : ' checked') + '> This date and time <input type="datetime-local" id="w-date" value="' + esc(post.dateAuto ? '' : forInput(post.date)) + '"></label></div>' +
@@ -535,7 +541,7 @@
         fc.innerHTML = cap.innerHTML; fig.appendChild(img); fig.appendChild(fc); par.parentNode.replaceChild(fig, par);
       });
       $all('a', body).forEach(function (a) { a.target = '_blank'; a.rel = 'noopener'; });
-      var sec = $('#w-sec').value, who = $('#w-author').value, guest = $('#w-guest').value, when = $('input[name="w-when"]:checked').value === 'set' && $('#w-date').value ? new Date($('#w-date').value) : new Date();
+      var sec = $('#w-sec').value, who = $('#w-author').value, guest = guestName(), when = $('input[name="w-when"]:checked').value === 'set' && $('#w-date').value ? new Date($('#w-date').value) : new Date();
       var day = when.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) + ', ' + when.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
       var leadImg = E.lead ? E.lead.url : (($('.w-pic img') || {}).src || '');
       box.innerHTML = '<header class="post-h">' + (sec ? '<span class="kicker">' + esc(sec) + '</span>' : '') + '<h1>' + (esc($('#w-title').value.trim()) || 'Title') + '</h1><p class="byline">' +
@@ -555,7 +561,9 @@
     }
     $('#w-view').addEventListener('click', function () { showView($('#w-view').getAttribute('aria-pressed') !== 'true'); });
 
-    $all('#w-sec,#w-author,#w-guest,#w-share,#w-wide,#w-date,#w-slug,input[name="w-when"]').forEach(function (el) { el.addEventListener('input', changed); el.addEventListener('change', changed); });
+    /* A guest who has never written for the blog: "Add a new guest author" opens a name, bio and link (Austin, November 27, 2026). */
+    $('#w-guest').addEventListener('change', function () { var on = $('#w-guest').value === '__new'; $('.w-newguest').hidden = !on; if (on) $('#w-gname').focus(); });
+    $all('#w-sec,#w-author,#w-guest,#w-share,#w-wide,#w-date,#w-slug,#w-gname,#w-gbio,#w-glink,#w-glabel,input[name="w-when"]').forEach(function (el) { el.addEventListener('input', changed); el.addEventListener('change', changed); });
     $('#w-date').addEventListener('input', function () { $('input[name="w-when"][value="set"]').checked = true; });
     $('#w-save').addEventListener('click', function () { save().catch(function () {}); });
     $('#w-publish').addEventListener('click', askPublish);
@@ -572,12 +580,25 @@
     if (!E.dirty) { E.dirty = true; window.onbeforeunload = function (ev) { ev.preventDefault(); ev.returnValue = ''; return ''; }; }
     setState('Not saved yet');
   }
+  function guestName() { var v = $('#w-guest').value; return v === '__new' ? $('#w-gname').value.trim().replace(/\s+/g, ' ') : v; }
+  /* A new guest's bio and link are kept on the guest's own page, content/contributors/<name>/_index.md, saved with the draft. */
+  function saveGuest(branch) {
+    if ($('#w-guest').value !== '__new' || !guestName() || !slugify(guestName())) return Promise.resolve();
+    var g = { title: guestName() }, bio = $('#w-gbio').value.trim(), link = $('#w-glink').value.trim(), label = $('#w-glabel').value.trim();
+    if (!bio && !link) return Promise.resolve();
+    if (bio) g.bio = bio; if (link) g.link = link; if (link && label) g.link_label = label;
+    var text = '---\n' + jsyaml.dump(g, { lineWidth: -1 }) + '---\n', path = 'content/contributors/' + slugify(guestName()) + '/_index.md';
+    if (E.guestSaved === path + text) return Promise.resolve();
+    return gh.file(path, branch).then(function (f) { return f.sha; }, function () { return undefined; }).then(function (sha) {
+      return gh.put(path, textToB64(text), branch, 'Add the guest author ' + guestName(), sha);
+    }).then(function () { E.guestSaved = path + text; });
+  }
   function gather() {
     var p = E.post;
     p.title = $('#w-title').value.trim();
     p.sections = $('#w-sec').value ? [$('#w-sec').value] : [];
     p.authors = $('#w-author').value ? [$('#w-author').value] : [];
-    p.contributors = $('#w-guest').value ? [$('#w-guest').value] : [];
+    p.contributors = guestName() ? [guestName()] : [];
     p.share_picture = $('#w-share').checked; p.wide = $('#w-wide').checked;
     p.dateAuto = $('input[name="w-when"]:checked').value === 'auto' || !$('#w-date').value;
     if (!p.dateAuto) p.date = isoLocal(new Date($('#w-date').value));
@@ -588,6 +609,7 @@
     if (!p.title) miss.push('a title');
     if (!p.sections.length) miss.push('a section');
     if (!p.authors.length) miss.push('your name under “Posted by”');
+    if ($('#w-guest').value === '__new' && !guestName()) miss.push('a name for the new guest author');
     return miss;
   }
   /* Is this address free? A post already on the site, or another draft, may have it. */
@@ -618,6 +640,7 @@
       return gh.mainSha().then(function (sha) { return gh.branch(PREFIX + s, sha); });
     });
     var branch = function () { return PREFIX + E.slug; };
+    chain = chain.then(function () { return saveGuest(branch()); });
     /* pictures first, the post last, so the draft's newest change is the post itself */
     chain = chain.then(function () {
       var body = realAddresses(p.body, E.pics), todo = Object.keys(E.pics).filter(function (n) { return !E.pics[n].saved && (body.indexOf('](/media/' + n + ')') >= 0 || body.indexOf('\n/media/' + n + '\n') >= 0); });
