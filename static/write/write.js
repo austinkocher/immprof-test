@@ -296,14 +296,17 @@
     pop.className = 'w-pop'; pop.hidden = true; pop.noValidate = true;
     function closePop() { pop.hidden = true; pop.innerHTML = ''; pop.onsubmit = null; }
     /* fields: [{ id, label, type, placeholder, hint, accept, value }]; done(values, fail) returns true when the form can close */
-    function openPop(title, fields, done) {
+    function openPop(title, fields, done, opt) {
+      opt = opt || {};
       look(false);
       pop.innerHTML = '<p class="w-pop-h">' + esc(title) + '</p>' + fields.map(function (f) {
         return '<label class="w-pop-f"><span>' + esc(f.label) + '</span><input name="' + f.id + '" type="' + (f.type || 'text') + '"' + (f.accept ? ' accept="' + f.accept + '"' : '') +
           (f.placeholder ? ' placeholder="' + esc(f.placeholder) + '"' : '') + ' value="' + esc(f.value || '') + '" autocomplete="off">' + (f.hint ? '<small>' + esc(f.hint) + '</small>' : '') + '</label>';
-      }).join('') + '<p class="w-pop-e" role="alert"></p><p class="w-pop-b"><button class="w-btn w-primary" type="submit">Add</button><button class="w-btn" type="button" data-x>Cancel</button></p>';
+      }).join('') + '<p class="w-pop-e" role="alert"></p><p class="w-pop-b"><button class="w-btn w-primary" type="submit">' + (opt.ok || 'Add') + '</button><button class="w-btn" type="button" data-x>Cancel</button>' + (opt.remove ? '<button class="w-link w-danger" type="button" data-r>Remove</button>' : '') + '</p>';
       pop.hidden = false;
       pop.querySelector('[data-x]').addEventListener('click', closePop);
+      if (opt.remove) pop.querySelector('[data-r]').addEventListener('click', function () { opt.remove(); closePop(); });
+      pop.scrollIntoView({ block: 'nearest' });
       pop.onsubmit = function (ev) {
         ev.preventDefault();
         var v = {}; fields.forEach(function (f) { var i = pop.elements[f.id]; v[f.id] = f.type === 'file' ? (i.files[0] || null) : i.value.trim(); });
@@ -324,13 +327,63 @@
     }
     function keep(file) { var n = pictureName(file); E.pics[n] = { url: URL.createObjectURL(file), blob: file, saved: false }; return E.pics[n].url; }
     /* How a card or video block looks while writing: a labeled box with the address in it. The real card is drawn when the site is built. */
-    function blockView(label) {
+    function blockView(label, kind) {
       return function (node) {
         var lines = String(node.literal || '').trim().split('\n');
-        return [{ type: 'openTag', tagName: 'div', outerNewLine: true, attributes: { class: 'w-block' } },
-          { type: 'html', content: '<span class="w-block-l">' + esc(label) + '</span><span class="w-block-a">' + esc(lines[0] || '') + '</span>' + lines.slice(1).map(function (l) { return '<span class="w-block-n">' + esc(l) + '</span>'; }).join('') },
+        return [{ type: 'openTag', tagName: 'div', outerNewLine: true, attributes: { class: 'w-block', 'data-kind': kind, title: 'Click to change' } },
+          { type: 'html', content: '<span class="w-block-l">' + esc(label) + '</span><span class="w-block-a">' + esc(lines[0] || '') + '</span>' + lines.slice(1).map(function (l) { var m = /^\s*(title|description)\s*:\s*(.*)$/.exec(l); return '<span class="' + (m && m[1] === 'title' ? 'w-block-h' : 'w-block-n') + '">' + esc(m ? m[2] : l) + '</span>'; }).join('') },
           { type: 'closeTag', tagName: 'div', outerNewLine: true }];
       };
+    }
+    /* Card and video blocks in the text, in order: { kind, text, start, end } */
+    var BLOCK = /^\$\$(card|video)\n([\s\S]*?)\n\$\$[ \t]*$/gm;
+    function blocks(md, kind) { var out = [], m; BLOCK.lastIndex = 0; while ((m = BLOCK.exec(md))) if (m[1] === kind) out.push({ text: m[2], start: m.index, end: m.index + m[0].length }); return out; }
+    function swapBlock(kind, n, text) {   /* text null removes the block */
+      var md = E.editor.getMarkdown(), b = blocks(md, kind)[n];
+      if (!b) return;
+      var before = md.slice(0, b.start), after = md.slice(b.end);
+      E.editor.setMarkdown(text === null ? before.replace(/\s+$/, '') + (after.trim() ? '\n\n' + after.replace(/^\s+/, '') : '\n') : before + text + after, false);
+      changed();
+    }
+    /* An outlet that does not let its pages be read (data/outlets.json): the card needs its headline typed in. */
+    function outletOf(address) {
+      var host = ''; try { host = new URL(address).hostname.replace(/^www\./, ''); } catch (e) { return null; }
+      var found = null; Object.keys(D.outlets || {}).forEach(function (d) { if (host === d || host.slice(-d.length - 1) === '.' + d) found = D.outlets[d]; });
+      return found;
+    }
+    function cardText(v) { return '$$card\n' + v.url + (v.title ? '\ntitle: ' + v.title : '') + (v.description ? '\ndescription: ' + v.description : '') + '\n$$'; }
+    function cardForm(at) {   /* at: null for a new card, or the number of the card being changed */
+      var old = { url: '', title: '', description: '' }, keepLines = [];
+      if (at !== null) {
+        var b = blocks(E.editor.getMarkdown(), 'card')[at]; if (!b) return;
+        var lines = b.text.split('\n'); old.url = (lines[0] || '').trim();
+        lines.slice(1).forEach(function (l) { var m = /^\s*(title|description)\s*:\s*(.*?)\s*$/.exec(l); if (m) old[m[1]] = m[2]; else if (l.trim()) keepLines.push(l); });
+      }
+      openPop('Link card', [
+        { id: 'url', label: 'Address of the article', type: 'url', placeholder: 'https://', value: old.url, hint: 'The card shows the article’s own title, description and picture. It appears in the preview after you save.' },
+        { id: 'title', label: 'Headline', placeholder: 'Optional', value: old.title, hint: 'Only if you want different words from the article’s own.' },
+        { id: 'description', label: 'Description', placeholder: 'Optional', value: old.description }
+      ], function (v, fail) {
+        if (!isAddress(v.url)) { fail('Paste the full address of the article, starting with https://'); return false; }
+        var o = outletOf(v.url);
+        if (o && o.refuses && !v.title) { fail('Paste the headline. ' + o.name + ' does not let its pages be read, so the card cannot find it.'); pop.elements.title.focus(); return false; }
+        var text = cardText(v) ; if (keepLines.length) text = text.replace(/\n\$\$$/, '\n' + keepLines.join('\n') + '\n$$');
+        if (at === null) insertBlock(text); else swapBlock('card', at, text);
+        return true;
+      }, at === null ? null : { ok: 'Save', remove: function () { swapBlock('card', at, null); } });
+      var hint = pop.elements.title.parentNode.querySelector('small'), first = hint.textContent;
+      function note() { var o = outletOf(pop.elements.url.value.trim()); hint.textContent = o && o.refuses ? o.name + ' does not let its pages be read. Paste the headline here; the card will show it with the outlet’s name' + (o.logo ? ' and logo.' : '.') : first; pop.elements.title.placeholder = o && o.refuses ? 'Needed for this outlet' : 'Optional'; }
+      pop.elements.url.addEventListener('input', note); note();
+    }
+    function videoForm(at) {
+      var old = '';
+      if (at !== null) { var b = blocks(E.editor.getMarkdown(), 'video')[at]; if (!b) return; old = b.text.trim(); }
+      openPop('Video', [{ id: 'url', label: 'Address of the video', type: 'url', placeholder: 'https://www.youtube.com/watch?v=', value: old, hint: 'YouTube or Vimeo. The player appears in the preview after you save.' }], function (v, fail) {
+        if (!/(youtube\.com\/(watch\?|embed\/|shorts\/|live\/)|youtu\.be\/|vimeo\.com\/(video\/)?\d+)/i.test(v.url) || !isAddress(v.url)) { fail('Paste the address of a YouTube or Vimeo video.'); return false; }
+        var text = '$$video\n' + v.url + '\n$$';
+        if (at === null) insertBlock(text); else swapBlock('video', at, text);
+        return true;
+      }, at === null ? null : { ok: 'Save', remove: function () { swapBlock('video', at, null); } });
     }
     var isAddress = function (a) { return /^https?:\/\/\S+\.\S+$/i.test(a); };
     var tools = {
@@ -362,34 +415,26 @@
           return true;
         });
       }),
-      card: tool('Link card', '<rect x="2.5" y="6" width="19" height="12" rx="1.5"/><path d="M5.5 10h5.5M5.5 13.5h4"/><rect x="14" y="9" width="5" height="6" fill="currentColor" stroke="none"/>', function () {
-        openPop('Link card', [
-          { id: 'url', label: 'Address of the article', type: 'url', placeholder: 'https://', hint: 'The card shows the article\u2019s own title, description and picture. It appears in the preview after you save.' },
-          { id: 'title', label: 'Title', placeholder: 'Optional', hint: 'Only if you want different words, or if the article\u2019s site does not allow its title to be read.' },
-          { id: 'description', label: 'Description', placeholder: 'Optional' }
-        ], function (v, fail) {
-          if (!isAddress(v.url)) { fail('Paste the full address of the article, starting with https://'); return false; }
-          insertBlock('$$card\n' + v.url + (v.title ? '\ntitle: ' + v.title : '') + (v.description ? '\ndescription: ' + v.description : '') + '\n$$');
-          return true;
-        });
-      }),
-      video: tool('Video', '<rect x="3" y="5.5" width="18" height="13" rx="2"/><path d="M10.5 9.5v5l4.5-2.5z" fill="currentColor"/>', function () {
-        openPop('Video', [{ id: 'url', label: 'Address of the video', type: 'url', placeholder: 'https://www.youtube.com/watch?v=', hint: 'YouTube or Vimeo. The player appears in the preview after you save.' }], function (v, fail) {
-          if (!/(youtube\.com\/(watch\?|embed\/|shorts\/|live\/)|youtu\.be\/|vimeo\.com\/(video\/)?\d+)/i.test(v.url) || !isAddress(v.url)) { fail('Paste the address of a YouTube or Vimeo video.'); return false; }
-          insertBlock('$$video\n' + v.url + '\n$$');
-          return true;
-        });
-      })
+      card: tool('Link card', '<rect x="2.5" y="6" width="19" height="12" rx="1.5"/><path d="M5.5 10h5.5M5.5 13.5h4"/><rect x="14" y="9" width="5" height="6" fill="currentColor" stroke="none"/>', function () { cardForm(null); }),
+      video: tool('Video', '<rect x="3" y="5.5" width="18" height="13" rx="2"/><path d="M10.5 9.5v5l4.5-2.5z" fill="currentColor"/>', function () { videoForm(null); })
     };
     E.editor = new toastui.Editor({
       el: $('#w-text'), height: 'auto', minHeight: '26rem', initialEditType: mode, previewStyle: 'tab', hideModeSwitch: true,
       usageStatistics: false, autofocus: false, placeholder: 'Write the post here.', initialValue: post.body,
-      customHTMLRenderer: { card: blockView('Link card'), video: blockView('Video') },
+      customHTMLRenderer: { card: blockView('Link card', 'card'), video: blockView('Video', 'video') },
       toolbarItems: [[tools.undo, tools.redo], ['heading', 'bold', 'italic'], ['quote', 'ul', 'ol', 'hr'], ['link', tools.picture, tools.file, tools.card, tools.video], [{ name: 'look', tooltip: 'Show how it will read', el: eye }]],
       hooks: { addImageBlobHook: function (blob, done) { var n = pictureName(blob); E.pics[n] = { url: URL.createObjectURL(blob), blob: blob, saved: false }; done(E.pics[n].url, ''); changed(); } },
       events: { change: function () { if (E) changed(); } }
     });
     (function () { var bar = $('#w-text .toastui-editor-toolbar'); if (bar) bar.parentNode.insertBefore(pop, bar.nextSibling); })();
+    $('#w-text').addEventListener('click', function (ev) {
+      var box = ev.target.closest ? ev.target.closest('.toastui-editor-ww-container .w-block') : null;
+      if (!box) return;
+      ev.preventDefault(); ev.stopPropagation();
+      var kind = box.getAttribute('data-kind'), n = $all('#w-text .toastui-editor-ww-container .w-block[data-kind="' + kind + '"]').indexOf(box);
+      if (n < 0) return;
+      if (kind === 'card') cardForm(n); else videoForm(n);
+    }, true);
     function showMode() { $all('.w-mode button').forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-mode') === mode ? 'true' : 'false'); }); $('#w-text').classList.toggle('is-markdown', mode === 'markdown'); }
     $all('.w-mode button').forEach(function (b) { b.addEventListener('click', function () { look(false); mode = b.getAttribute('data-mode'); E.editor.changeMode(mode, true); store.set('mode', mode); showMode(); }); });
     showMode();

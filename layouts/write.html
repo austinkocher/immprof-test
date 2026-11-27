@@ -12,7 +12,7 @@
 <link rel="stylesheet" href="{{ "write/write.css" | relURL }}">
 <div id="write" class="write"><p class="w-note">Loading the writing page.</p></div>
 <noscript><p>The writing page needs JavaScript.</p></noscript>
-<script type="application/json" id="write-data">{{ dict "repo" site.Params.editorRepo "branch" site.Params.editorBranch "site" site.Params.editorSite "sections" $sections "tags" $tags "authors" $authors "guests" $guests | jsonify | safeJS }}</script>
+<script type="application/json" id="write-data">{{ dict "repo" site.Params.editorRepo "branch" site.Params.editorBranch "site" site.Params.editorSite "sections" $sections "tags" $tags "authors" $authors "guests" $guests "outlets" hugo.Data.outlets.outlets | jsonify | safeJS }}</script>
 <script src="{{ "write/vendor/js-yaml.min.js" | relURL }}"></script>
 <script src="{{ "write/vendor/toastui-editor-all.min.js" | relURL }}"></script>
 <script src="{{ "write/write.js" | relURL }}"></script>
