@@ -1,6 +1,8 @@
 {{ define "main" }}
 {{- /* Search (Pagefind) reads only what is inside data-pagefind-body: the title and text of a post. */ -}}
 {{- $cat := site.GetPage (printf "/category/%s" .Params.category_slug) -}}
+{{- $yr := site.GetPage (printf "/year/%s" (.Date.Format "2006")) -}}
+{{- with $yr }}{{ partial "crumbs.html" (slice (dict "t" "Posts by year" "u" (printf "%s#years" site.Home.RelPermalink)) (dict "t" .Title "u" .RelPermalink) (dict "t" ($.Date.Format "January") "u" (printf "%s#m%s" .RelPermalink ($.Date.Format "01")))) }}{{ end }}
 <article class="post" data-pagefind-body>
   <span hidden data-pagefind-filter="year:{{ .Date.Format "2006" }}"></span>
   <span hidden data-pagefind-meta="date:{{ partial "day.html" . }}" data-pagefind-sort="date:{{ .Date.Format "2006-01-02" }}"></span>

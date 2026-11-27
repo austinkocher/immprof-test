@@ -2,7 +2,7 @@
 {{- $posts := where (partial "posts.html" .) "Params.category" .Params.category -}}
 {{- $pg := .Paginate $posts -}}
 <header class="list-h">
-  <p class="kicker"><a href="{{ site.Home.RelPermalink }}#categories">Posts by category</a></p>
+  {{ partial "crumbs.html" (slice (dict "t" "Posts by category" "u" (printf "%s#categories" site.Home.RelPermalink)) (dict "t" .Title)) }}
   <h1>{{ .Title }}</h1>
   <p class="list-m">{{ lang.FormatNumber 0 (len $posts) }} {{ if eq (len $posts) 1 }}post{{ else }}posts{{ end }}, newest first{{ if gt $pg.TotalPages 1 }}. Page {{ $pg.PageNumber }} of {{ $pg.TotalPages }}{{ end }}</p>
 </header>

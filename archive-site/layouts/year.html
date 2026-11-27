@@ -6,7 +6,7 @@
 {{- $posts := where (partial "posts.html" .) "Params.year" .Params.year -}}
 {{- $months := $posts.GroupByDate "2006-01" -}}
 <header class="list-h">
-  <p class="kicker"><a href="{{ site.Home.RelPermalink }}#years">Posts by year</a></p>
+  {{ partial "crumbs.html" (slice (dict "t" "Posts by year" "u" (printf "%s#years" site.Home.RelPermalink)) (dict "t" .Title)) }}
   <h1>{{ .Title }}</h1>
   <p class="list-m">{{ lang.FormatNumber 0 (len $posts) }} {{ if eq (len $posts) 1 }}post{{ else }}posts{{ end }} in {{ len $months }} {{ if eq (len $months) 1 }}month{{ else }}months{{ end }}. Choose a month to see its posts.</p>
   {{ if gt (len $months) 1 }}<p class="month-all"><button type="button" data-months="open">Open all months</button> <button type="button" data-months="close">Close all months</button></p>{{ end }}

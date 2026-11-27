@@ -1,0 +1,12 @@
+{{- /* The trail back to the archive's front page, shown above the title on a year, a category and a post
+       (Austin, November 27, 2026: "use breadcrumb menu or something so that when you go into the years and months you
+       can get back to the archive landing page"). Called with a list of steps, each a dict with "t" (words) and
+       "u" (address); the last step is the page itself and has no address. Search leaves it out of its index. */ -}}
+<nav class="crumbs" aria-label="Where this page is in the archive" data-pagefind-ignore>
+  <ol>
+    <li><a href="{{ site.Home.RelPermalink }}">Archive</a></li>
+    {{- range . }}
+    <li>{{ if .u }}<a href="{{ .u }}">{{ .t }}</a>{{ else }}<span aria-current="page">{{ .t }}</span>{{ end }}</li>
+    {{- end }}
+  </ol>
+</nav>
