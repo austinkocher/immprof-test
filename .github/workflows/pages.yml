@@ -4,7 +4,7 @@
 # reported back on the draft's latest change (a commit status named "preview") so the form can link to it.
 # A preview shows a post dated in the future, which the published site leaves out until its time has passed.
 # Each preview has a version.txt naming the draft's latest change, which the writing page (/write/) reads to tell
-# when the preview has caught up with a save.
+# when the preview has caught up with a save. A preview is the current site with the draft's own files laid over it.
 # Pull requests from other people's copies of this repository are never built.
 name: Publish the test site
 on:
@@ -59,8 +59,19 @@ jobs:
             --jq '.[] | select(.isCrossRepository == false) | "\(.number) \(.headRefOid)"' > /tmp/drafts.txt
           while read -r N SHA; do
             [ -n "$N" ] || continue
+            # The preview is the site as it is now with the draft's own files laid over it, so a draft saved before a
+            # change to the site's design still previews with the current design.
             git fetch --quiet --depth 1 origin "pull/$N/head"
-            git worktree add --quiet "../pr-$N" FETCH_HEAD
+            git worktree add --quiet --detach "../pr-$N" HEAD
+            gh api "repos/$GITHUB_REPOSITORY/pulls/$N/files" --paginate \
+              --jq '.[] | [.status, .filename, (.previous_filename // "")] | @tsv' > "/tmp/files-$N.tsv"
+            while IFS=$'\t' read -r ST F OLD; do
+              [ -n "$F" ] || continue
+              if [ -n "$OLD" ]; then rm -f "../pr-$N/$OLD"; fi
+              if [ "$ST" = "removed" ]; then rm -f "../pr-$N/$F"; continue; fi
+              mkdir -p "../pr-$N/$(dirname "$F")"
+              git show "FETCH_HEAD:$F" > "../pr-$N/$F"
+            done < "/tmp/files-$N.tsv"
             ln -s "$PWD/resources" "../pr-$N/resources"
             (cd "../pr-$N" && HUGO_BASEURL="$SITE/preview/pr-$N/" hugo --quiet --buildFuture --buildDrafts --destination "$GITHUB_WORKSPACE/public/preview/pr-$N")
             echo "$SHA" > "$GITHUB_WORKSPACE/public/preview/pr-$N/version.txt"
